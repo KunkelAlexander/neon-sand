@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/cursor.gd" id="1_10kv6"]
 [ext_resource type="Script" path="res://scripts/sand_simulation.gd" id="2_oxs87"]
-[ext_resource type="Script" path="res://scripts/sand_renderer.gd" id="3_a327k"]
+[ext_resource type="Script" path="res://scripts/gpu_renderer.gd" id="3_vh1vf"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -18,5 +18,8 @@ script = ExtResource("1_10kv6")
 [node name="SandSimulation" type="Node" parent="."]
 script = ExtResource("2_oxs87")
 
+[node name="SandSimulation" type="Node" parent="SandSimulation"]
+script = ExtResource("2_oxs87")
+
 [node name="SandRenderer" type="Node2D" parent="."]
-script = ExtResource("3_a327k")
+script = ExtResource("3_vh1vf")
