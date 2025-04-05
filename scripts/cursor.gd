@@ -19,7 +19,7 @@ func screen_to_grid(mouse_pos: Vector2) -> Vector2i:
 	var scale_y = float(Global.HEIGHT) / screen_size.y
 	return Vector2i(int(mouse_pos.x * scale_x), int(mouse_pos.y * scale_y))
 	
-func _process(delta):
+func _process(_delta):
 	# Update cursor position
 	position = get_global_mouse_position()
 	

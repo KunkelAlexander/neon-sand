@@ -48,8 +48,8 @@ func update_sand():
 	# 2) If you just placed new pixels this frame, put them in the *read* buffer
 	#    so the simulation sees them immediately.
 	for pos_type in active_pixels:
-		var index = pos_type[0]
-		var sand_type = pos_type[1]
+		var index        = pos_type[0]
+		var sand_type    = pos_type[1]
 		read_grid[index] = sand_type
 	active_pixels.clear()
 
@@ -117,6 +117,7 @@ func update_sand():
 func spawn_sand(coords, radius, sand_type = SAND_TYPE1):
 	var grid_x = coords.x
 	var grid_y = coords.y
+	
 	
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):

@@ -1,7 +1,7 @@
 extends Node
 
-@export var WIDTH = 400
-@export var HEIGHT = 300
+@export var WIDTH = 200
+@export var HEIGHT = 150
 
 # Sand type definitions
 const SAND_EMPTY = 0

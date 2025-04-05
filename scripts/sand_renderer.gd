@@ -35,7 +35,7 @@ func _on_grid_updated(grids, active_grid):
 	for i in range(Global.WIDTH * Global.HEIGHT):
 			
 		var type = updated_grid[i]
-		var color = Color(0, 0, 0, 0)#sand_colors.get(type, Color(0, 0, 0, 0))  # Default to transparent
+		var color = sand_colors.get(type, Color(0, 0, 0, 0))  # Default to transparent
 
 		# Convert Color to byte format (RGBA)
 		var r = int(color.r * 255)
