@@ -78,7 +78,7 @@ func _on_grid_updated(grids, active_grid):
 	data.resize(Global.WIDTH * Global.HEIGHT)
 
 	for i in range(Global.WIDTH * Global.HEIGHT):
-		data[i] = updated_grid[i] * 255
+		data[i] = int(updated_grid[i] / 3.0 * 255)
 
 	type_image.set_data(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8, data)
 	type_texture.update(type_image)
