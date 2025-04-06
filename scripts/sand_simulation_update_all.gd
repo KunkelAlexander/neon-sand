@@ -18,7 +18,7 @@ var sand_colors = {
 }
 
 # The grid stores an integer per pixel (0 = empty, otherwise the sand type)
-var sand_grids = [Array(), Array()]
+var sand_grids = [PackedByteArray(), PackedByteArray()]
 var active_grid = 0 
 
 # List of indices (in the grid) that where added
@@ -34,7 +34,8 @@ func _ready():
 func _process(delta):
 	update_sand()
 	grid_updated.emit(sand_grids, active_grid)  # Notify renderer
-	
+
+
 func update_sand():
 	# We'll read from the "active_grid" buffer,
 	# and write into the other buffer.
@@ -53,6 +54,7 @@ func update_sand():
 		read_grid[index] = sand_type
 	active_pixels.clear()
 
+			
 	# 3) Simulation: read from the old buffer, write results into the new.
 	for y in range(Global.HEIGHT - 1, -1, -1): # from bottom up or second-to-last row is also common
 		for x in range(Global.WIDTH):

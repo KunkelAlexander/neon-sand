@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c8maycj72kdl7"]
 
 [ext_resource type="Script" path="res://scripts/cursor.gd" id="1_10kv6"]
-[ext_resource type="Script" path="res://scripts/sand_simulation.gd" id="2_oxs87"]
+[ext_resource type="Script" path="res://scripts/sand_simulation_update_active.gd" id="2_5rbfh"]
 [ext_resource type="Script" path="res://scripts/gpu_renderer.gd" id="3_vh1vf"]
 
 [node name="Node2D" type="Node2D"]
@@ -16,10 +16,7 @@ z_index = 4
 script = ExtResource("1_10kv6")
 
 [node name="SandSimulation" type="Node" parent="."]
-script = ExtResource("2_oxs87")
-
-[node name="SandSimulation" type="Node" parent="SandSimulation"]
-script = ExtResource("2_oxs87")
+script = ExtResource("2_5rbfh")
 
 [node name="SandRenderer" type="Node2D" parent="."]
 script = ExtResource("3_vh1vf")
