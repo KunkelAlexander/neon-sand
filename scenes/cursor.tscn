@@ -11,7 +11,7 @@
 [node name="Background" type="ColorRect" parent="."]
 offset_right = 802.0
 offset_bottom = 599.0
-color = Color(0.97518, 0.705253, 0.490719, 1)
+color = Color(0.188358, 0.0373057, 0.0233519, 1)
 
 [node name="Input" type="Node2D" parent="."]
 z_index = 4

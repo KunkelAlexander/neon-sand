@@ -44,7 +44,7 @@ func _ready():
 	texture_rect.texture = type_texture
 	texture_rect.material = shader_material
 	texture_rect.z_index = 100  # Any value higher than other siblings
-	texture_rect.size = Vector2(800, 600)
+	texture_rect.size = Vector2(1200, 800)
 	add_child(texture_rect)
 
 	
