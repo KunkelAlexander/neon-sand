@@ -5,3 +5,6 @@
 addons/
 venv/
 html/
+*.os
+*.uid
+demo_src/

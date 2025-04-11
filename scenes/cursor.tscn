@@ -1,10 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://c8maycj72kdl7"]
+[gd_scene load_steps=5 format=3 uid="uid://c8maycj72kdl7"]
 
-[ext_resource type="Script" path="res://scripts/cursor.gd" id="1_10kv6"]
-[ext_resource type="Script" path="res://scripts/sand_simulation_update_active.gd" id="2_5rbfh"]
-[ext_resource type="Script" path="res://scripts/gpu_renderer.gd" id="3_vh1vf"]
+[ext_resource type="Script" uid="uid://6obvkl6ec58y" path="res://scripts/cursor.gd" id="1_10kv6"]
+[ext_resource type="Script" uid="uid://dcnbemj7ja4xt" path="res://scripts/gpu_renderer.gd" id="3_vh1vf"]
 [ext_resource type="FontFile" uid="uid://ee7xbhgb8w64" path="res://assets/fonts/PressStart2P.ttf" id="4_iparr"]
-[ext_resource type="Script" path="res://scripts/show_fps.gd" id="5_dmrtd"]
+[ext_resource type="Script" uid="uid://dhrqxaqkhky4t" path="res://scripts/show_fps.gd" id="5_dmrtd"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -17,9 +16,6 @@ color = Color(0.188358, 0.0373057, 0.0233519, 1)
 z_index = 4
 script = ExtResource("1_10kv6")
 
-[node name="SandSimulation" type="Node" parent="."]
-script = ExtResource("2_5rbfh")
-
 [node name="SandRenderer" type="Node2D" parent="."]
 script = ExtResource("3_vh1vf")
 
@@ -31,3 +27,5 @@ theme_override_font_sizes/font_size = 31
 text = "FPS: "
 vertical_alignment = 1
 script = ExtResource("5_dmrtd")
+
+[node name="SandSimulation" type="SandSimulation" parent="."]

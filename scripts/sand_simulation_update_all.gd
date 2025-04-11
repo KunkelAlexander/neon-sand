@@ -33,7 +33,7 @@ func _ready():
 	
 func _process(delta):
 	update_sand()
-	grid_updated.emit(sand_grids, active_grid)  # Notify renderer
+	grid_updated.emit(sand_grids[active_grid])  # Notify renderer
 
 
 func update_sand():

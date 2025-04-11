@@ -69,16 +69,14 @@ func create_color_palette_texture():
 	color_palette_texture = ImageTexture.create_from_image(palette_image)
 
 
-func _on_grid_updated(grids, active_grid):
-	var updated_grid = grids[active_grid]
-
+func _on_grid_updated(grid):
 	var type_image = Image.create(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8)
 
 	var data = PackedByteArray()
 	data.resize(Global.WIDTH * Global.HEIGHT)
 
 	for i in range(Global.WIDTH * Global.HEIGHT):
-		data[i] = int(updated_grid[i] / 3.0 * 255)
+		data[i] = int(grid[i] / 3.0 * 255)
 
 	type_image.set_data(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8, data)
 	type_texture.update(type_image)

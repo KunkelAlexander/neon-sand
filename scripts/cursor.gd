@@ -42,6 +42,9 @@ func _process(_delta):
 		var radius   = grid_to_screen(cursor_size)
 		sand_sim.spawn_sand(grid_pos, radius, Global.SAND_EMPTY)
 		
+	if Input.is_action_pressed("key_exit"):
+		get_tree().quit()
+	
 	if Input.is_action_pressed("press_1"):
 		sand_type = Global.SAND_TYPE1
 	if Input.is_action_pressed("press_2"):
@@ -51,3 +54,7 @@ func _process(_delta):
 		
 func _draw():
 	draw_circle(Vector2.ZERO, cursor_size, Color(1, 1, 1))
+
+
+func _on_sand_simulation_grid_updated(old_grid: Variant, new_grid: Variant) -> void:
+	pass # Replace with function body.
