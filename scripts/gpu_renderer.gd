@@ -13,7 +13,8 @@ var shader_material = ShaderMaterial.new()
 var type_texture = ImageTexture.new()
 var color_palette_texture = ImageTexture.new()
 var texture_rect: TextureRect
-
+var type_image = Image.create(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8)
+var data = PackedByteArray()
 # For tracking performance
 var profiler_enabled = true
 
@@ -24,10 +25,12 @@ func _ready():
 		push_error("Failed to load sand shader!")
 		return
 		
+	
+	data.resize(Global.WIDTH * Global.HEIGHT)
+	
 	shader_material.shader = shader
 	
 	# Create initial type texture (this will store sand types)
-	var type_image = Image.create(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8)
 	type_texture = ImageTexture.create_from_image(type_image)
 	
 	# Create color palette texture
@@ -70,13 +73,5 @@ func create_color_palette_texture():
 
 
 func _on_grid_updated(grid):
-	var type_image = Image.create(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8)
-
-	var data = PackedByteArray()
-	data.resize(Global.WIDTH * Global.HEIGHT)
-
-	for i in range(Global.WIDTH * Global.HEIGHT):
-		data[i] = int(grid[i] / 3.0 * 255)
-
-	type_image.set_data(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8, data)
+	type_image.set_data(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8, grid)
 	type_texture.update(type_image)

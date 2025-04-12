@@ -5,12 +5,12 @@ uniform sampler2D sand_colors;
 
 void fragment() {
 	// Get the sand type at this pixel
-	float sand_type =  texture(sand_texture, UV).r;
-	
+	float sand_type =  texture(sand_texture, UV).r /3.0*255.0;
+
 	float palette_width = float(textureSize(sand_colors, 0).x);
-	float x = (sand_type * (palette_width - 1.0) + 0.5) / palette_width;
+	float x = (sand_type  * (palette_width - 1.0) + 0.5) / palette_width;
 	vec4 color = texture(sand_colors, vec2(x, 0.5));
-	
+
 	// Output the color
 	COLOR = color;
 }

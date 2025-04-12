@@ -55,8 +55,9 @@ public:
     // Called every frame
 	void _process(double delta) override;
 
-    // Update sand simulatsion
+    // Update sand simulation
     void update_sand();
+    void update_active_sand();
 
     void debug_list_all_nodes();
 

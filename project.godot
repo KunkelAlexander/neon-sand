@@ -23,7 +23,6 @@ Global="*res://scripts/global.gd"
 
 window/size/viewport_width=1200
 window/size/viewport_height=800
-window/size/mode=3
 
 [editor]
 

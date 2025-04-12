@@ -206,9 +206,7 @@ void SandSimulation::_ready() {
     // Initialize sand grids
     for (int i = 0; i < 2; i++) {
         sand_grids[i].resize(width * height);
-        for (int j = 0; j < width * height; j++) {
-            sand_grids[i].set(j, SAND_EMPTY);
-        }
+        sand_grids[i].fill(SAND_EMPTY);
     }
 
     active_grid = 0;
@@ -221,7 +219,7 @@ void SandSimulation::_process(double delta) {
     emit_signal("grid_updated", sand_grids[active_grid]);
 }
 
-void SandSimulation::update_sand() {
+void SandSimulation::update_active_sand() {
 
     int width = get_width();
     int height = get_height();
@@ -342,6 +340,96 @@ void SandSimulation::update_sand() {
     active_grid = next_active_grid;
     active_cells = new_active_cells;
 
+}
+
+void SandSimulation::update_sand() {
+    int width = get_width();
+    int height = get_height();
+
+    // Instead of using active cells, we'll process the entire grid
+    PackedByteArray& read_grid  = sand_grids[active_grid];
+    PackedByteArray& write_grid = sand_grids[1 - active_grid];
+    write_grid.fill(SAND_EMPTY);
+
+    // Add any new sand pixels to the read grid
+    for (int i = 0; i < active_pixels.size(); i++) {
+        Array pos_type = active_pixels[i];
+        int pos = pos_type[0];
+        int sand_type = pos_type[1];
+        read_grid.set(pos, sand_type);
+    }
+    active_pixels.clear();
+
+    // Process all cells starting from bottom-left going to top-right
+    // Bottom row
+    for (int x = 0; x < width; x++) {
+        const int y = height - 1;
+        const int pos = x + y * width;
+        const int sand_type = read_grid[pos];
+
+        if (sand_type == SAND_EMPTY) {
+            continue;  // Skip empty cells
+        } else {
+            // Bottom row: the particle cannot move further.
+            write_grid.set(pos, sand_type);
+        }
+    }
+
+    // This ensures sand falls properly in a single sweep
+    for (int y = height - 2; y >= 0; y--) {
+        for (int x = 0; x < width; x++) {
+            const int pos = x + y * width;
+            const int sand_type = read_grid[pos];
+
+            if (sand_type == SAND_EMPTY) {
+                continue;  // Skip empty cells
+            }
+
+            // Check if the cell can move down (if not in the bottom row)
+            const int below = x + (y + 1) * width;
+
+            if (write_grid[below] == SAND_EMPTY) {
+                // Move down
+                write_grid.set(below, sand_type);
+            } else {
+                // Check diagonal movement
+                bool left_empty = false;
+                bool right_empty = false;
+                int left = -1;
+                int right = -1;
+
+                if (x > 0) {
+                    left = (x - 1) + (y + 1) * width;
+                    left_empty = write_grid[left] == SAND_EMPTY;
+                }
+
+                if (x < width - 1) {
+                    right = (x + 1) + (y + 1) * width;
+                    right_empty = write_grid[right] == SAND_EMPTY;
+                }
+
+                if (left_empty || right_empty) {
+                    if (left_empty && right_empty) {
+                        // Random choice between left and right
+                        if (1 % 2 == 0) {
+                            write_grid.set(left, sand_type);
+                        } else {
+                            write_grid.set(right, sand_type);
+                        }
+                    } else if (left_empty) {
+                        write_grid.set(left, sand_type);
+                    } else if (right_empty) {
+                        write_grid.set(right, sand_type);
+                    }
+                } else {
+                    write_grid.set(pos, sand_type);
+                }
+            }
+        }
+    }
+
+    // Swap grids
+    active_grid = 1 - active_grid;
 }
 
 void SandSimulation::spawn_sand(const Vector2& coords, int radius, int sand_type) {

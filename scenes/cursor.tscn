@@ -8,8 +8,8 @@
 [node name="Node2D" type="Node2D"]
 
 [node name="Background" type="ColorRect" parent="."]
-offset_right = 802.0
-offset_bottom = 599.0
+offset_right = 1204.0
+offset_bottom = 799.0
 color = Color(0.188358, 0.0373057, 0.0233519, 1)
 
 [node name="Input" type="Node2D" parent="."]
