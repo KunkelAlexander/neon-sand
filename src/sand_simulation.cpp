@@ -360,74 +360,64 @@ void SandSimulation::update_sand() {
     }
     active_pixels.clear();
 
-    // Process all cells starting from bottom-left going to top-right
-    // Bottom row
-    for (int x = 0; x < width; x++) {
-        const int y = height - 1;
-        const int pos = x + y * width;
-        const int sand_type = read_grid[pos];
 
-        if (sand_type == SAND_EMPTY) {
-            continue;  // Skip empty cells
-        } else {
-            // Bottom row: the particle cannot move further.
+    // Process bottom row (can't move further down)
+    const int bottom_row = height - 1;
+    const int bottom_row_offset = bottom_row * width;
+    for (int x = 0; x < width; x++) {
+        const int pos = x + bottom_row_offset;
+        const int sand_type = read_grid[pos];
+        if (sand_type != SAND_EMPTY) {
             write_grid.set(pos, sand_type);
         }
     }
 
-    // This ensures sand falls properly in a single sweep
+    // Process remaining rows from bottom to top
     for (int y = height - 2; y >= 0; y--) {
+        const int row_offset = y * width;
+        const int row_below_offset = (y + 1) * width;
+
         for (int x = 0; x < width; x++) {
-            const int pos = x + y * width;
+            const int pos = x + row_offset;
             const int sand_type = read_grid[pos];
 
-            if (sand_type == SAND_EMPTY) {
-                continue;  // Skip empty cells
-            }
+            if (sand_type == SAND_EMPTY) continue;
 
-            // Check if the cell can move down (if not in the bottom row)
-            const int below = x + (y + 1) * width;
+            // Check if cell can move down
+            const int below = x + row_below_offset;
 
             if (write_grid[below] == SAND_EMPTY) {
                 // Move down
                 write_grid.set(below, sand_type);
+                continue;
+            }
+
+            // Check diagonal movements - calculate only what we need
+            int left = -1, right = -1;
+            bool left_empty = false, right_empty = false;
+
+            // Check left diagonal if not at left edge
+            if (x > 0) {
+                left = (x - 1) + row_below_offset;
+                left_empty = write_grid[left] == SAND_EMPTY;
+            }
+
+            // Check right diagonal if not at right edge
+            if (x < width - 1 && !left_empty) {  // Skip if we can already move left
+                right = (x + 1) + row_below_offset;
+                right_empty = write_grid[right] == SAND_EMPTY;
+            }
+
+            if (left_empty) {
+                write_grid.set(left, sand_type);
+            } else if (right_empty) {
+                write_grid.set(right, sand_type);
             } else {
-                // Check diagonal movement
-                bool left_empty = false;
-                bool right_empty = false;
-                int left = -1;
-                int right = -1;
-
-                if (x > 0) {
-                    left = (x - 1) + (y + 1) * width;
-                    left_empty = write_grid[left] == SAND_EMPTY;
-                }
-
-                if (x < width - 1) {
-                    right = (x + 1) + (y + 1) * width;
-                    right_empty = write_grid[right] == SAND_EMPTY;
-                }
-
-                if (left_empty || right_empty) {
-                    if (left_empty && right_empty) {
-                        // Random choice between left and right
-                        if (1 % 2 == 0) {
-                            write_grid.set(left, sand_type);
-                        } else {
-                            write_grid.set(right, sand_type);
-                        }
-                    } else if (left_empty) {
-                        write_grid.set(left, sand_type);
-                    } else if (right_empty) {
-                        write_grid.set(right, sand_type);
-                    }
-                } else {
-                    write_grid.set(pos, sand_type);
-                }
+                // Can't move, stay in place
+                write_grid.set(pos, sand_type);
             }
         }
     }
-
     // Swap grids
     active_grid = 1 - active_grid;
 }
