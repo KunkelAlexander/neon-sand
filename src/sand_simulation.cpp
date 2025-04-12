@@ -377,6 +377,7 @@ void SandSimulation::update_sand() {
         const int row_offset = y * width;
         const int row_below_offset = (y + 1) * width;
 
+        // Check 8-byte chunks at a type, CAREFUL: will only work if width is a multiple of 8 and we have the right instructions
         for (int chunk = 0; chunk < width; chunk +=8) {
             const int chunk_pos = chunk + row_offset;
             uint64_t chunk_value = *reinterpret_cast<const uint64_t*>(read_grid.ptr() + chunk_pos);
