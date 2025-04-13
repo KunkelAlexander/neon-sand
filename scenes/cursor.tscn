@@ -46,8 +46,8 @@ _data = {
 [node name="Node2D" type="Node2D"]
 
 [node name="Background" type="ColorRect" parent="."]
-offset_right = 1936.0
-offset_bottom = 1096.0
+offset_right = 1920.0
+offset_bottom = 1080.0
 color = Color(0.971336, 0.575732, 0.516346, 1)
 
 [node name="Input" type="Node2D" parent="."]

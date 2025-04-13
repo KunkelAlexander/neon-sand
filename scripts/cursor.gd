@@ -1,9 +1,16 @@
 extends Node2D
 
-var cursor_size: float = 10.0
+var cursor_size: float = 30.0
 @onready var sand_sim = $"../SandSimulation"  # Reference the sand simulation node
 var sand_type = 0
 var time_passed := 0.0
+
+# Track touch points' positions and previous distances
+var touch_positions := {}
+var last_touch_distance := 0.0
+
+# Initialize variables for pinch gesture handling
+var last_gesture_scale := 1.0
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)  # Hide default cursor
@@ -50,6 +57,8 @@ func _process(delta):
 
 	if Input.is_action_pressed("key_exit"):
 		get_tree().quit()
+
+			
 
 
 func _draw():
