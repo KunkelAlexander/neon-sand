@@ -385,7 +385,7 @@ void SandSimulation::update_sand() {
 
             // Check if 8 cells below current 8 cells are empty and just make the whole row fall
             const int       chunk_below_pos   = chunk + row_below_offset;
-            const uint64_t* chunk_below_value = reinterpret_cast<const uint64_t*>(read_grid.ptr() + chunk_below_pos);
+            const uint64_t* chunk_below_value = reinterpret_cast<const uint64_t*>(write_grid.ptr() + chunk_below_pos);
             if (*chunk_below_value == SAND_EMPTY) {
 
                 uint64_t* chunk_below_write_value = reinterpret_cast<uint64_t*>(write_grid.ptrw() + chunk_below_pos);
@@ -429,7 +429,7 @@ void SandSimulation::update_sand() {
 
                 if (left_empty && right_empty) {
                     // Random choice between left and right using proper RNG
-                    if (UtilityFunctions::randi() % 2 == 0) {
+                    if (UtilityFunctions::randi() % 2 == 1) {
                         write_grid.set(left, sand_type);
                     } else {
                         write_grid.set(right, sand_type);
