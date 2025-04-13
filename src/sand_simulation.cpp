@@ -344,19 +344,20 @@ void SandSimulation::update_sand() {
     int width = get_width();
     int height = get_height();
 
-    // Instead of using active cells, we'll process the entire grid
-    PackedByteArray& read_grid  = sand_grids[active_grid];
-    PackedByteArray& write_grid = sand_grids[1 - active_grid];
-    write_grid.fill(SAND_EMPTY);
-
-    // Add any new sand pixels to the read grid
+    // Add any new sand pixels to the active grid
     for (int i = 0; i < active_pixels.size(); i++) {
         const Array pos_type = active_pixels[i];
-        const int pos = pos_type[0];
-        const int sand_type = pos_type[1];
-        read_grid.set(pos, sand_type);
+        const int pos        = pos_type[0];
+        const int sand_type  = pos_type[1];
+        sand_grids[active_grid].set(pos, sand_type);
     }
     active_pixels.clear();
+
+
+    // Instead of using active cells, we'll process the entire grid
+    const PackedByteArray& read_grid  = sand_grids[    active_grid];
+          PackedByteArray& write_grid = sand_grids[1 - active_grid];
+    write_grid.fill(SAND_EMPTY);
 
 
     // Process bottom row (can't move further down)
@@ -365,9 +366,7 @@ void SandSimulation::update_sand() {
     for (int x = 0; x < width; x++) {
         const int pos = x + bottom_row_offset;
         const int sand_type = read_grid[pos];
-        if (sand_type != SAND_EMPTY) {
-            write_grid.set(pos, sand_type);
-        }
+        write_grid.set(pos, sand_type);
     }
 
     // Process remaining rows from bottom to top
@@ -375,73 +374,46 @@ void SandSimulation::update_sand() {
         const int row_offset       =  y      * width;
         const int row_below_offset = (y + 1) * width;
 
-        // Check 8-byte chunks at a type, CAREFUL: will only work if width is a multiple of 8 and we have the right instructions
-        for (int chunk = 0; chunk < width; chunk +=8) {
+        const bool forward_sweep = (UtilityFunctions::randi() % 2 == 0);
+        const int x0 = forward_sweep ? 0 : width-1;
+        const int x1 = forward_sweep ? width : 0;
+        const int dx = forward_sweep ? 1 : -1;
 
-            // Check if next 8 bytes aka 8 cells are 0 and therefore empty
-            const int       chunk_pos   = chunk + row_offset;
-            const uint64_t* chunk_value = reinterpret_cast<const uint64_t*>(read_grid.ptr() + chunk_pos);
-            if (*chunk_value == SAND_EMPTY) continue;
+        for (int x = x0; forward_sweep ? (x < x1) : (x >= x1 ); x += dx) {
+            const int pos       = x + row_offset;
+            const int sand_type = read_grid[pos];
 
-            // Check if 8 cells below current 8 cells are empty and just make the whole row fall
-            const int       chunk_below_pos   = chunk + row_below_offset;
-            const uint64_t* chunk_below_value = reinterpret_cast<const uint64_t*>(write_grid.ptr() + chunk_below_pos);
-            if (*chunk_below_value == SAND_EMPTY) {
+            if (sand_type == SAND_EMPTY) continue;
 
-                uint64_t* chunk_below_write_value = reinterpret_cast<uint64_t*>(write_grid.ptrw() + chunk_below_pos);
-                *chunk_below_write_value = *chunk_value;
+            // Check if cell can move down
+            const int below = x + row_below_offset;
 
+            if (write_grid[below] == SAND_EMPTY) {
+                // Move down
+                write_grid.set(below, sand_type);
                 continue;
             }
 
+            // Check diagonal movements
+            const int left         = (x - 1) + row_below_offset;
+            const int right        = (x + 1) + row_below_offset;
+            const bool left_empty  = (x > 0)         && (write_grid[left] == SAND_EMPTY);
+            const bool right_empty = (x < width - 1) && (write_grid[right] == SAND_EMPTY);
 
-            for (int xi = 0; xi < 8; ++xi) {
-                const int x   = chunk + xi;
-                const int pos = x + row_offset;
-                const int sand_type = read_grid[pos];
-
-                if (sand_type == SAND_EMPTY) continue;
-
-                // Check if cell can move down
-                const int below = x + row_below_offset;
-
-                if (write_grid[below] == SAND_EMPTY) {
-                    // Move down
-                    write_grid.set(below, sand_type);
-                    continue;
-                }
-
-                // Check diagonal movements
-                int left = -1, right = -1;
-                bool left_empty = false, right_empty = false;
-
-                // Check left diagonal if not at left edge
-                if (x > 0) {
-                    left = (x - 1) + row_below_offset;
-                    left_empty = write_grid[left] == SAND_EMPTY;
-                }
-
-                // Check right diagonal if not at right edge
-                if (x < width - 1) {
-                    right = (x + 1) + row_below_offset;
-                    right_empty = write_grid[right] == SAND_EMPTY;
-                }
-
-                if (left_empty && right_empty) {
-                    // Random choice between left and right using proper RNG
-                    if (UtilityFunctions::randi() % 2 == 1) {
-                        write_grid.set(left, sand_type);
-                    } else {
-                        write_grid.set(right, sand_type);
-                    }
-                } else if (left_empty) {
+            if (left_empty && right_empty) {
+                // Random choice between left and right using proper RNG
+                if (UtilityFunctions::randi() % 2 == 1) {
                     write_grid.set(left, sand_type);
-                } else if (right_empty) {
-                    write_grid.set(right, sand_type);
                 } else {
-                    // Can't move, stay in place
-                    write_grid.set(pos, sand_type);
+                    write_grid.set(right, sand_type);
                 }
+            } else if (left_empty) {
+                write_grid.set(left, sand_type);
+            } else if (right_empty) {
+                write_grid.set(right, sand_type);
+            } else {
+                // Can't move, stay in place
+                write_grid.set(pos, sand_type);
             }
         }
     }
