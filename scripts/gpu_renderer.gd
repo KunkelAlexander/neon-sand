@@ -47,7 +47,7 @@ func _ready():
 	texture_rect.texture = type_texture
 	texture_rect.material = shader_material
 	texture_rect.z_index = 0  # Any value higher than other siblings
-	texture_rect.size = Vector2(Global.WIDTH, Global.HEIGHT)
+	texture_rect.size = get_viewport_rect().size
 	add_child(texture_rect)
 
 	

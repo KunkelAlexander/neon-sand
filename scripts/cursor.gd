@@ -13,13 +13,13 @@ func grid_to_screen(coordinate: float) -> float:
 	var screen_size = get_viewport_rect().size
 	var scale_x = float(Global.WIDTH) / screen_size.x
 	return int(coordinate*scale_x)
-	
+
 func screen_to_grid(mouse_pos: Vector2) -> Vector2i:
 	var screen_size = get_viewport_rect().size
 	var scale_x = float(Global.WIDTH) / screen_size.x
 	var scale_y = float(Global.HEIGHT) / screen_size.y
 	return Vector2i(int(mouse_pos.x * scale_x), int(mouse_pos.y * scale_y))
-	
+
 func _process(delta):
 	time_passed += delta
 
@@ -51,7 +51,7 @@ func _process(delta):
 	if Input.is_action_pressed("key_exit"):
 		get_tree().quit()
 
-		
+
 func _draw():
 	draw_circle(Vector2.ZERO, cursor_size, Color(1, 1, 1), false)
 
