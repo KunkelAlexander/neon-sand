@@ -1,16 +1,54 @@
-[gd_scene load_steps=5 format=3 uid="uid://c8maycj72kdl7"]
+[gd_scene load_steps=9 format=3 uid="uid://c8maycj72kdl7"]
 
 [ext_resource type="Script" uid="uid://6obvkl6ec58y" path="res://scripts/cursor.gd" id="1_10kv6"]
 [ext_resource type="Script" uid="uid://dcnbemj7ja4xt" path="res://scripts/gpu_renderer.gd" id="3_vh1vf"]
 [ext_resource type="FontFile" uid="uid://ee7xbhgb8w64" path="res://assets/fonts/PressStart2P.ttf" id="4_iparr"]
 [ext_resource type="Script" uid="uid://dhrqxaqkhky4t" path="res://scripts/show_fps.gd" id="5_dmrtd"]
+[ext_resource type="Script" uid="uid://bwdcjlu408pty" path="res://scripts/title.gd" id="5_pey64"]
+
+[sub_resource type="Animation" id="Animation_pey64"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_n5qf0"]
+resource_name = "fade_out"
+length = 5.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 4.96667),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_xjntw"]
+_data = {
+&"RESET": SubResource("Animation_pey64"),
+&"fade_out": SubResource("Animation_n5qf0")
+}
 
 [node name="Node2D" type="Node2D"]
 
 [node name="Background" type="ColorRect" parent="."]
-offset_right = 1204.0
-offset_bottom = 799.0
-color = Color(0.188358, 0.0373057, 0.0233519, 1)
+offset_right = 1200.0
+offset_bottom = 800.0
+color = Color(0.971336, 0.575732, 0.516346, 1)
 
 [node name="Input" type="Node2D" parent="."]
 z_index = 4
@@ -19,9 +57,11 @@ script = ExtResource("1_10kv6")
 [node name="SandRenderer" type="Node2D" parent="."]
 script = ExtResource("3_vh1vf")
 
-[node name="Label" type="Label" parent="."]
-offset_right = 197.0
-offset_bottom = 72.0
+[node name="FPS" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 24.0
+offset_right = 213.0
+offset_bottom = 96.0
 theme_override_fonts/font = ExtResource("4_iparr")
 theme_override_font_sizes/font_size = 31
 text = "FPS: "
@@ -29,3 +69,20 @@ vertical_alignment = 1
 script = ExtResource("5_dmrtd")
 
 [node name="SandSimulation" type="SandSimulation" parent="."]
+
+[node name="Title" type="Label" parent="."]
+offset_left = 256.0
+offset_top = 64.0
+offset_right = 960.0
+offset_bottom = 262.0
+theme_override_fonts/font = ExtResource("4_iparr")
+theme_override_font_sizes/font_size = 72
+text = "Neon Sand"
+horizontal_alignment = 3
+vertical_alignment = 1
+script = ExtResource("5_pey64")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Title"]
+libraries = {
+&"": SubResource("AnimationLibrary_xjntw")
+}

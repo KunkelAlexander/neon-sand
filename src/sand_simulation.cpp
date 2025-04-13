@@ -14,11 +14,6 @@
 using namespace godot;
 
 SandSimulation::SandSimulation() {
-    // Initialize sand colors
-    sand_colors[SAND_EMPTY] = Color(0, 0, 0, 0);
-    sand_colors[SAND_TYPE1] = Color(1, 1, 1, 1);
-    sand_colors[SAND_TYPE2] = Color(1, 0, 0, 1);
-    sand_colors[SAND_TYPE3] = Color(0, 1, 0, 1);
 }
 
 SandSimulation::~SandSimulation() {
@@ -224,9 +219,10 @@ void SandSimulation::update_active_sand() {
     int width = get_width();
     int height = get_height();
     PackedByteArray& read_grid = sand_grids[active_grid];
-
+    PackedByteArray& write_grid = sand_grids[1 - active_grid];
     // Instead of clearing the write grid completely, copy the read grid so that cells not processed remain unchanged
-    PackedByteArray write_grid = read_grid.duplicate();
+    write_grid = read_grid.duplicate();
+
 
     // Add any new sand pixels to the read grid and mark them as active
     for (int i = 0; i < active_pixels.size(); i++) {
@@ -335,11 +331,13 @@ void SandSimulation::update_active_sand() {
     }
 
     // Swap grids
-    int next_active_grid = 1 - active_grid;
-    sand_grids[next_active_grid] = write_grid;
-    active_grid = next_active_grid;
+    active_grid = 1 - active_grid;
     active_cells = new_active_cells;
 
+}
+
+inline bool SandSimulation::has_zero_byte(uint64_t x) {
+    return ((x - 0x0101010101010101ULL) & ~x & 0x8080808080808080ULL) != 0;
 }
 
 void SandSimulation::update_sand() {
@@ -353,9 +351,9 @@ void SandSimulation::update_sand() {
 
     // Add any new sand pixels to the read grid
     for (int i = 0; i < active_pixels.size(); i++) {
-        Array pos_type = active_pixels[i];
-        int pos = pos_type[0];
-        int sand_type = pos_type[1];
+        const Array pos_type = active_pixels[i];
+        const int pos = pos_type[0];
+        const int sand_type = pos_type[1];
         read_grid.set(pos, sand_type);
     }
     active_pixels.clear();
@@ -374,14 +372,28 @@ void SandSimulation::update_sand() {
 
     // Process remaining rows from bottom to top
     for (int y = height - 2; y >= 0; y--) {
-        const int row_offset = y * width;
+        const int row_offset       =  y      * width;
         const int row_below_offset = (y + 1) * width;
 
         // Check 8-byte chunks at a type, CAREFUL: will only work if width is a multiple of 8 and we have the right instructions
         for (int chunk = 0; chunk < width; chunk +=8) {
-            const int chunk_pos = chunk + row_offset;
-            uint64_t chunk_value = *reinterpret_cast<const uint64_t*>(read_grid.ptr() + chunk_pos);
-            if (chunk_value == 0) continue;
+
+            // Check if next 8 bytes aka 8 cells are 0 and therefore empty
+            const int       chunk_pos   = chunk + row_offset;
+            const uint64_t* chunk_value = reinterpret_cast<const uint64_t*>(read_grid.ptr() + chunk_pos);
+            if (*chunk_value == SAND_EMPTY) continue;
+
+            // Check if 8 cells below current 8 cells are empty and just make the whole row fall
+            const int       chunk_below_pos   = chunk + row_below_offset;
+            const uint64_t* chunk_below_value = reinterpret_cast<const uint64_t*>(read_grid.ptr() + chunk_below_pos);
+            if (*chunk_below_value == SAND_EMPTY) {
+
+                uint64_t* chunk_below_write_value = reinterpret_cast<uint64_t*>(write_grid.ptrw() + chunk_below_pos);
+                *chunk_below_write_value = *chunk_value;
+
+                continue;
+            }
+
 
             for (int xi = 0; xi < 8; ++xi) {
                 const int x   = chunk + xi;

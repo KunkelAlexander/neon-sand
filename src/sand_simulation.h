@@ -21,12 +21,6 @@ class SandSimulation : public Node {
 private:
     // Sand type definitions
     static const uint8_t SAND_EMPTY = 0;
-    static const uint8_t SAND_TYPE1 = 1;  // e.g. white sand
-    static const uint8_t SAND_TYPE2 = 2;  // e.g. red sand
-    static const uint8_t SAND_TYPE3 = 3;  // e.g. green sand
-
-    // Colors for each sand type
-    Dictionary sand_colors;
 
     // The grid stores an integer per pixel (0 = empty, otherwise the sand type)
     PackedByteArray sand_grids[2];
@@ -41,6 +35,7 @@ private:
     // Helper functions
     int get_width();
     int get_height();
+    bool has_zero_byte(uint64_t x);
 
 protected:
     static void _bind_methods();
@@ -62,13 +57,7 @@ public:
     void debug_list_all_nodes();
 
     // Spawn sand into the simulation
-    void spawn_sand(const Vector2& coords, int radius, int sand_type = SAND_TYPE1);
-
-    // Getters for sand types
-    int get_sand_empty() const { return SAND_EMPTY; }
-    int get_sand_type1() const { return SAND_TYPE1; }
-    int get_sand_type2() const { return SAND_TYPE2; }
-    int get_sand_type3() const { return SAND_TYPE3; }
+    void spawn_sand(const Vector2& coords, int radius, int sand_type);
 
 };
 
