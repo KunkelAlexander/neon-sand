@@ -6,7 +6,7 @@ extends Node2D
 
 var sand_type = 0
 var time_passed := 0.0
-var brush_size: float = 50.0
+var brush_size: float = 10.0
 var paint_mode: bool = true
 
 # Track touch points' positions and previous distances
@@ -49,10 +49,10 @@ func _process(delta):
 
 	# Create sand particles when left mouse button is pressed
 	if Input.is_action_pressed("left_click"):
-		sand_sim.spawn_sand(position, brush_size, sand_type)
+		sand_sim.spawn_sand(position/4, brush_size, sand_type)
 
 	if Input.is_action_pressed("right_click"):
-		sand_sim.spawn_sand(position, brush_size, Global.SAND_EMPTY)
+		sand_sim.spawn_sand(position/4, brush_size, Global.SAND_EMPTY)
 
 	if Input.is_action_pressed("key_exit"):
 		get_tree().quit()
@@ -61,4 +61,4 @@ func _process(delta):
 
 
 func _draw():
-	draw_circle(Vector2.ZERO, brush_size, Color(1, 1, 1), false)
+	draw_circle(Vector2.ZERO, brush_size*4, Color(1, 1, 1), false)
