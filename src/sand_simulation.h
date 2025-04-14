@@ -21,6 +21,8 @@ class SandSimulation : public Node {
 private:
     // Sand type definitions
     static const uint8_t SAND_EMPTY = 0;
+    uint32_t simulation_width;
+    uint32_t simulation_height;
 
     // The grid stores an integer per pixel (0 = empty, otherwise the sand type)
     PackedByteArray sand_grids[2];
@@ -33,8 +35,8 @@ private:
     Dictionary active_cells;  // keys are cell indices; values are true
 
     // Helper functions
-    int get_width();
-    int get_height();
+    int get_width() const;
+    int get_height() const;
     bool has_zero_byte(uint64_t x);
 
 protected:
@@ -52,13 +54,14 @@ public:
 
     // Update sand simulation
     void update_sand();
-    void update_active_sand();
 
     void debug_list_all_nodes();
 
     // Spawn sand into the simulation
     void spawn_sand(const Vector2& coords, int radius, int sand_type);
 
+    // Resize simulation grid
+    void resize_simulation(int width, int height);
 };
 
 }

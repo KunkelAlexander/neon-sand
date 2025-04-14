@@ -13,32 +13,35 @@ var shader_material = ShaderMaterial.new()
 var type_texture = ImageTexture.new()
 var color_palette_texture = ImageTexture.new()
 var texture_rect: TextureRect
-var type_image = Image.create(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8)
-var data = PackedByteArray()
+var type_image: Image
+var width: int
+var height: int 
+
 # For tracking performance
 var profiler_enabled = true
 
 func _ready():
-	# Load the shader
+	# Load the shadergodo
 	var shader = load("res://shaders/sand_shader.gdshader")
 	if shader == null:
 		push_error("Failed to load sand shader!")
 		return
-		
-	
-	data.resize(Global.WIDTH * Global.HEIGHT)
 	
 	shader_material.shader = shader
 	
-	# Create initial type texture (this will store sand types)
+	var size = get_viewport_rect().size
+	width  = size.x
+	height = size.y 
+	
+	# Recreate image and texture and rebind it
+	type_image   = Image.create(width, height, false, Image.FORMAT_R8)
 	type_texture = ImageTexture.create_from_image(type_image)
+	shader_material.set_shader_parameter("sand_texture", type_texture)
 	
 	# Create color palette texture
 	create_color_palette_texture()
-	
-	# Pass textures to shader
-	shader_material.set_shader_parameter("sand_texture", type_texture)
 	shader_material.set_shader_parameter("sand_colors", color_palette_texture)
+	
 	
 	# Set up the TextureRect
 	texture_rect = TextureRect.new()
@@ -47,27 +50,60 @@ func _ready():
 	texture_rect.texture = type_texture
 	texture_rect.material = shader_material
 	texture_rect.z_index = 0  # Any value higher than other siblings
-	texture_rect.size = get_viewport_rect().size
+	texture_rect.size = size
 	add_child(texture_rect)
-
+	
+	
+	var simulation = get_parent().get_node("SandSimulation")
+	# Notify it of size
+	simulation.resize_simulation(width, height)
+	
+	_resize_simulation()
 	
 	# Connect to simulation for updates
-	var simulation = get_parent().get_node("SandSimulation")
 	simulation.grid_updated.connect(_on_grid_updated)
+	
+	# Connect viewport resize event
+	get_viewport().size_changed.connect(_resize_simulation)
+
+
+func _resize_simulation():
+	print("Pardur")
+	var new_size = get_viewport().get_visible_rect().size
+	var new_width = int(new_size.x)
+	var new_height = int(new_size.y)
+	width  = new_width
+	height = new_height
+
+	print("Resizing simulation to ", new_width, "x", new_height)
+
+	# Recreate image and texture and rebind it
+	type_image   = Image.create(new_width, new_height, false, Image.FORMAT_R8)
+	type_texture = ImageTexture.create_from_image(type_image)
+	shader_material.set_shader_parameter("sand_texture", type_texture)
+
+	# Resize the display rect
+	texture_rect.size = new_size
+	texture_rect.texture = type_texture
+
+	# Notify simulation
+	var simulation = get_parent().get_node("SandSimulation")
+	simulation.resize_simulation(new_width, new_height)
+
 
 func create_color_palette_texture():
 	var palette_size = 255
 	var base_colors := []
 	var num_base = 8  # Number of control colors
 
-	base_colors.append(Color(0.0, 0.0, 0.0, 0.0))
 	# Generate base pastel/neon colors
 	for i in range(num_base):
 		var hue = randf()
 		var sat = randf_range(0.4, 1.0)
 		var val = randf_range(0.8, 1.0)
 		base_colors.append(Color.from_hsv(hue, sat, val))
-
+	base_colors[0].a = 0.0
+	
 	var palette_image = Image.create(palette_size, 1, false, Image.FORMAT_RGBA8)
 
 	for i in range(palette_size):
@@ -132,5 +168,5 @@ func create_fixed_color_palette_texture():
 
 
 func _on_grid_updated(grid):
-	type_image.set_data(Global.WIDTH, Global.HEIGHT, false, Image.FORMAT_R8, grid)
+	type_image.set_data(width, height, false, Image.FORMAT_R8, grid)
 	type_texture.update(type_image)

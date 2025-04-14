@@ -21,6 +21,7 @@ SandSimulation::~SandSimulation() {
 }
 
 void SandSimulation::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("resize_simulation"), &SandSimulation::resize_simulation);
     ClassDB::bind_method(D_METHOD("spawn_sand"), &SandSimulation::spawn_sand);
 
     // Register the signal with its parameters
@@ -69,7 +70,7 @@ int SandSimulation::get_height() {
     }
 
     return height;
-}*/
+}
 
 void SandSimulation::debug_list_all_nodes() {
     // Get the SceneTree
@@ -190,21 +191,35 @@ int SandSimulation::get_height() {
     }
 
     return height;
+}*/
+
+int SandSimulation::get_width() const {
+    return simulation_width;
 }
 
-void SandSimulation::_ready() {
-    int width = get_width();
-    int height = get_height();
+int SandSimulation::get_height() const {
+    return simulation_height;
+}
 
-    UtilityFunctions::print("Width: ", width, " Height: ", height);
+
+
+
+void SandSimulation::_ready() {
+    active_grid = 0;
+    simulation_height = 0;
+    simulation_width = 0;
+}
+
+void SandSimulation::resize_simulation(int width, int height) {
+
+    simulation_width  = width;
+    simulation_height = height;
 
     // Initialize sand grids
     for (int i = 0; i < 2; i++) {
         sand_grids[i].resize(width * height);
         sand_grids[i].fill(SAND_EMPTY);
     }
-
-    active_grid = 0;
 }
 
 void SandSimulation::_process(double delta) {
@@ -214,127 +229,6 @@ void SandSimulation::_process(double delta) {
     emit_signal("grid_updated", sand_grids[active_grid]);
 }
 
-void SandSimulation::update_active_sand() {
-
-    int width = get_width();
-    int height = get_height();
-    PackedByteArray& read_grid = sand_grids[active_grid];
-    PackedByteArray& write_grid = sand_grids[1 - active_grid];
-    // Instead of clearing the write grid completely, copy the read grid so that cells not processed remain unchanged
-    write_grid = read_grid.duplicate();
-
-
-    // Add any new sand pixels to the read grid and mark them as active
-    for (int i = 0; i < active_pixels.size(); i++) {
-        Array pos_type = active_pixels[i];
-        int pos = pos_type[0];
-        int sand_type = pos_type[1];
-        read_grid.set(pos, sand_type);
-        active_cells[pos] = true;
-    }
-    active_pixels.clear();
-
-    Dictionary new_active_cells;
-
-    // Process only cells in the active set
-    Array active_cell_keys = active_cells.keys();
-    for (int i = 0; i < active_cell_keys.size(); i++) {
-        int pos = active_cell_keys[i];
-        int x = pos % width;
-        int y = pos / width;
-        int sand_type = read_grid[pos];
-
-        if (sand_type == SAND_EMPTY) {
-            continue;  // Skip if nothing is in this cell
-        }
-
-        bool moved = false;
-
-        // Check if the cell can move down (if not in the bottom row)
-        if (y < height - 1) {
-            int below = x + (y + 1) * width;
-            if (read_grid[below] == SAND_EMPTY) {
-                // Move down: clear the old position in write grid and write to the new one
-                write_grid.set(below, sand_type);
-                write_grid.set(pos, SAND_EMPTY);
-                moved = true;
-                new_active_cells[below] = true;
-
-                // Activate cells above the new position
-                if (y > 0) {
-                    new_active_cells[x + (y - 1) * width] = true;
-                    if (x > 0) {
-                        new_active_cells[(x - 1) + (y - 1) * width] = true;
-                    }
-                    if (x < width - 1) {
-                        new_active_cells[(x + 1) + (y - 1) * width] = true;
-                    }
-                }
-                // Keep current cell active so any changes can be re-evaluated
-                new_active_cells[pos] = true;
-            } else {
-                // Check diagonal movement
-                int left = -1;
-                int right = -1;
-                bool left_empty = false;
-                bool right_empty = false;
-
-                if (x > 0) {
-                    left = (x - 1) + (y + 1) * width;
-                    left_empty = read_grid[left] == SAND_EMPTY;
-                }
-                if (x < width - 1) {
-                    right = (x + 1) + (y + 1) * width;
-                    right_empty = read_grid[right] == SAND_EMPTY;
-                }
-
-                if (left_empty || right_empty) {
-                    if (left_empty && right_empty) {
-                        // Use UtilityFunctions instead of Math for random
-                        if (UtilityFunctions::randi() % 2 == 0) {
-                            write_grid.set(left, sand_type);
-                            write_grid.set(pos, SAND_EMPTY);
-                            new_active_cells[left] = true;
-                        } else {
-                            write_grid.set(right, sand_type);
-                            write_grid.set(pos, SAND_EMPTY);
-                            new_active_cells[right] = true;
-                        }
-                    } else if (left_empty) {
-                        write_grid.set(left, sand_type);
-                        write_grid.set(pos, SAND_EMPTY);
-                        new_active_cells[left] = true;
-                    } else if (right_empty) {
-                        write_grid.set(right, sand_type);
-                        write_grid.set(pos, SAND_EMPTY);
-                        new_active_cells[right] = true;
-                    }
-
-                    moved = true;
-                    // Activate cells above the new position
-                    if (y > 0) {
-                        new_active_cells[x + (y - 1) * width] = true;
-                        if (x > 0) {
-                            new_active_cells[(x - 1) + (y - 1) * width] = true;
-                        }
-                        if (x < width - 1) {
-                            new_active_cells[(x + 1) + (y - 1) * width] = true;
-                        }
-                    }
-                    new_active_cells[pos] = true;
-                }
-                // Else: the cell is settled. Do nothing, so its value remains in write_grid.
-            }
-        }
-        // Bottom row: the particle cannot move further.
-        // Its value was already copied over by the duplicate, so we don't change it.
-    }
-
-    // Swap grids
-    active_grid = 1 - active_grid;
-    active_cells = new_active_cells;
-
-}
 
 inline bool SandSimulation::has_zero_byte(uint64_t x) {
     return ((x - 0x0101010101010101ULL) & ~x & 0x8080808080808080ULL) != 0;
