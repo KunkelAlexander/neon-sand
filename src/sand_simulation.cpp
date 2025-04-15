@@ -230,10 +230,6 @@ void SandSimulation::_process(double delta) {
 }
 
 
-inline bool SandSimulation::has_zero_byte(uint64_t x) {
-    return ((x - 0x0101010101010101ULL) & ~x & 0x8080808080808080ULL) != 0;
-}
-
 void SandSimulation::update_sand() {
     int width = get_width();
     int height = get_height();
@@ -249,9 +245,9 @@ void SandSimulation::update_sand() {
 
 
     // Instead of using active cells, we'll process the entire grid
-    const PackedByteArray& read_grid  = sand_grids[    active_grid];
-          PackedByteArray& write_grid = sand_grids[1 - active_grid];
-    write_grid.fill(SAND_EMPTY);
+    const PackedByteArray& grid_old  = sand_grids[    active_grid];
+          PackedByteArray& grid_new  = sand_grids[1 - active_grid];
+    grid_new.fill(SAND_EMPTY);
 
 
     // Process bottom row (can't move further down)
@@ -259,58 +255,94 @@ void SandSimulation::update_sand() {
     const int bottom_row_offset = bottom_row * width;
     for (int x = 0; x < width; x++) {
         const int pos = x + bottom_row_offset;
-        const int sand_type = read_grid[pos];
-        write_grid.set(pos, sand_type);
+        grid_new.set(pos, grid_old[pos]);
     }
 
-    // Process remaining rows from bottom to top
+
+    // --- First Pass: Update "Red" Cells where (x+y) % 2 == 0 ---
     for (int y = height - 2; y >= 0; y--) {
-        const int row_offset       =  y      * width;
+        const int row_offset       = y * width;
         const int row_below_offset = (y + 1) * width;
+        for (int x = 0; x < width; x++) {
+            if (((x + y) & 1) != 0)  // Skip non-red cells in this pass.
+                continue;
 
-        const bool forward_sweep = (UtilityFunctions::randi() % 2 == 0);
-        const int x0 = forward_sweep ? 0 : width-1;
-        const int x1 = forward_sweep ? width : 0;
-        const int dx = forward_sweep ? 1 : -1;
+            const int pos = row_offset + x;
+            const int sand_type = grid_old[pos];
 
-        for (int x = x0; forward_sweep ? (x < x1) : (x >= x1 ); x += dx) {
-            const int pos       = x + row_offset;
-            const int sand_type = read_grid[pos];
+            // If the current cell is empty, nothing to do.
+            if (sand_type == SAND_EMPTY)
+                continue;
 
-            if (sand_type == SAND_EMPTY) continue;
-
-            // Check if cell can move down
-            const int below = x + row_below_offset;
-
-            if (write_grid[below] == SAND_EMPTY) {
-                // Move down
-                write_grid.set(below, sand_type);
+            // Try to move down if possible.
+            int below = x + row_below_offset;
+            if (grid_old[below] == SAND_EMPTY) {
+                grid_new.set(below, sand_type);
                 continue;
             }
 
-            // Check diagonal movements
-            const int left         = (x - 1) + row_below_offset;
-            const int right        = (x + 1) + row_below_offset;
-            const bool left_empty  = (x > 0)         && (write_grid[left] == SAND_EMPTY);
-            const bool right_empty = (x < width - 1) && (write_grid[right] == SAND_EMPTY);
+            // Determine the status of the diagonals.
+            bool left_empty  = (x > 0)         && (grid_new[row_below_offset + (x - 1)] == SAND_EMPTY);
+            bool right_empty = (x < width - 1)   && (grid_new[row_below_offset + (x + 1)] == SAND_EMPTY);
 
+            // When both directions are possible, pick randomly.
             if (left_empty && right_empty) {
-                // Random choice between left and right using proper RNG
-                if (UtilityFunctions::randi() % 2 == 1) {
-                    write_grid.set(left, sand_type);
-                } else {
-                    write_grid.set(right, sand_type);
-                }
+                if (UtilityFunctions::randi() & 1)
+                    grid_new.set(row_below_offset + (x - 1), sand_type);
+                else
+                    grid_new.set(row_below_offset + (x + 1), sand_type);
             } else if (left_empty) {
-                write_grid.set(left, sand_type);
+                grid_new.set(row_below_offset + (x - 1), sand_type);
             } else if (right_empty) {
-                write_grid.set(right, sand_type);
+                grid_new.set(row_below_offset + (x + 1), sand_type);
             } else {
-                // Can't move, stay in place
-                write_grid.set(pos, sand_type);
+                // No movement; keep the sand in its original place.
+                grid_new.set(pos, sand_type);
             }
         }
     }
+
+    // --- Second Pass: Update "Black" Cells where (x+y) % 2 == 1 ---
+    // In this pass, we now read any red-cell updates that have been written into grid_new.
+    for (int y = height - 2; y >= 0; y--) {
+        const int row_offset       = y * width;
+        const int row_below_offset = (y + 1) * width;
+        for (int x = 0; x < width; x++) {
+            if (((x + y) & 1) == 0)  // Skip the red cells in this pass.
+                continue;
+
+            const int pos = row_offset + x;
+            const int sand_type = grid_old[pos];
+
+            if (sand_type == SAND_EMPTY)
+                continue;
+
+            // Try to move down.
+            int below = x + row_below_offset;
+            if (grid_old[below] == SAND_EMPTY) {
+                grid_new.set(below, sand_type);
+                continue;
+            }
+
+            // Check diagonal movements.
+            bool left_empty  = (x > 0)         && (grid_new[row_below_offset + (x - 1)] == SAND_EMPTY);
+            bool right_empty = (x < width - 1) && (grid_new[row_below_offset + (x + 1)] == SAND_EMPTY);
+
+            if (left_empty && right_empty) {
+                if (UtilityFunctions::randi() & 1)
+                    grid_new.set(row_below_offset + (x - 1), sand_type);
+                else
+                    grid_new.set(row_below_offset + (x + 1), sand_type);
+            } else if (left_empty) {
+                grid_new.set(row_below_offset + (x - 1), sand_type);
+            } else if (right_empty) {
+                grid_new.set(row_below_offset + (x + 1), sand_type);
+            } else {
+                grid_new.set(pos, sand_type);
+            }
+        }
+    }
+
     // Swap grids
     active_grid = 1 - active_grid;
 }

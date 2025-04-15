@@ -36,6 +36,8 @@ func _ready():
 	
 	# Set up the TextureRect
 	texture_rect = TextureRect.new()
+	texture_rect.expand = true
+	texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	texture_rect.texture = type_texture
 	texture_rect.material = shader_material
 	texture_rect.z_index = 0  # Any value higher than other siblings

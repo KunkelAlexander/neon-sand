@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-uniform sampler2D sand_texture : filter_nearest;
+uniform sampler2D sand_texture;
 uniform sampler2D sand_colors;
 
 void fragment() {
