@@ -34,7 +34,7 @@ func _process(delta):
 	time_passed += delta
 
 	# Smooth cycle from 0 to 254 over 10 seconds (adjust speed as needed)
-	sand_type = int(time_passed * 10) % 255
+	sand_type = int(time_passed * 10) % 254 + 1
 
 	# Update cursor position
 	position = get_global_mouse_position()

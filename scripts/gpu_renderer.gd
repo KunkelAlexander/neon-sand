@@ -27,6 +27,7 @@ func _ready():
 	type_image   = Image.create(width, height, false, Image.FORMAT_R8)
 	type_texture = ImageTexture.create_from_image(type_image)
 	shader_material.set_shader_parameter("sand_texture", type_texture)
+	shader_material.set_shader_parameter("simulation_resolution", Vector2(width, height))
 	
 	# Create color palette texture
 	create_color_palette_texture()
@@ -35,8 +36,6 @@ func _ready():
 	
 	# Set up the TextureRect
 	texture_rect = TextureRect.new()
-	texture_rect.expand = true
-	texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	texture_rect.texture = type_texture
 	texture_rect.material = shader_material
 	texture_rect.z_index = 0  # Any value higher than other siblings
@@ -68,10 +67,9 @@ func _resize_simulation():
 	type_image = Image.create(width, height, false, Image.FORMAT_R8)
 
 	# Create texture with nearest-neighbor filtering
-	type_texture = ImageTexture.create_from_image(type_image)
-	#type_texture.set_texture_filter(TEXTURE_FILTER_NEAREST)
-	
+	type_texture = ImageTexture.create_from_image(type_image)	
 	shader_material.set_shader_parameter("sand_texture", type_texture)
+	shader_material.set_shader_parameter("simulation_resolution", Vector2(width, height))
 
 	# Update TextureRect
 	texture_rect.texture = type_texture
@@ -84,15 +82,14 @@ func _resize_simulation():
 func create_color_palette_texture():
 	var palette_size = 255
 	var base_colors := []
-	var num_base = 8  # Number of control colors
-
+	var num_base = 16  # Number of control colors
+	randomize()
 	# Generate base pastel/neon colors
 	for i in range(num_base):
 		var hue = randf()
 		var sat = randf_range(0.4, 1.0)
 		var val = randf_range(0.8, 1.0)
 		base_colors.append(Color.from_hsv(hue, sat, val))
-	base_colors[0].a = 0.0
 	
 	var palette_image = Image.create(palette_size, 1, false, Image.FORMAT_RGBA8)
 
@@ -106,7 +103,7 @@ func create_color_palette_texture():
 
 		var interpolated = c1.lerp(c2, frac)
 		palette_image.set_pixel(i, 0, interpolated)
-
+	palette_image.set_pixel(0, 0, Color(0, 0, 0, 0))
 	color_palette_texture = ImageTexture.create_from_image(palette_image)
 
 func create_random_color_palette_texture():
