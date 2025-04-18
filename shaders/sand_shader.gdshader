@@ -13,7 +13,7 @@ void fragment() {
 
     // Sample the sand type from the sand texture using adjusted UV coordinates.
     float sand_type = texture(sand_texture, snappedUV).r;
-	
+
 	vec4 color = texture(sand_colors, vec2(sand_type, 0.5));
 
 	// Output the color

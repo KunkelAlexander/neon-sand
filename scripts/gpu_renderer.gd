@@ -84,7 +84,7 @@ func _resize_simulation():
 func create_color_palette_texture():
 	var palette_size = 255
 	var base_colors := []
-	var num_base = 16  # Number of control colors
+	var num_base = 8  # Number of control colors
 	randomize()
 	# Generate base pastel/neon colors
 	for i in range(num_base):

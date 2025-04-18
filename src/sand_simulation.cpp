@@ -29,170 +29,6 @@ void SandSimulation::_bind_methods() {
         PropertyInfo(Variant::PACKED_BYTE_ARRAY, "sand_grid")));
 }
 
-/*
-int SandSimulation::get_width() {
-    // Access the global WIDTH constant from GDScript
-    Object* global = Engine::get_singleton()->get_singleton("Global");
-    if (!global) {
-        ERR_PRINT("Failed to get Global singleton. Is it registered as an autoload?");
-        return 0; // Return default value in case of failure
-    }
-
-    Variant width = global->get("WIDTH");
-    if (width.get_type() != Variant::INT) {
-        ERR_PRINT("Global.WIDTH is not an integer or doesn't exist");
-        return 0; // Return default value if WIDTH is not valid
-    }
-
-    return width;
-}
-
-int SandSimulation::get_height() {
-
-    // Print all available singletons
-    Array singletons = Engine::get_singleton()->get_singleton_list();
-    for (int i = 0; i < singletons.size(); i++) {
-        String singleton_name = singletons[i];
-        UtilityFunctions::print("Available singleton: ", singleton_name);
-    }
-
-    // Access the global HEIGHT constant from GDScript
-    Object* global = Engine::get_singleton()->get_singleton("Global");
-    if (!global) {
-        ERR_PRINT("Failed to get Global singleton. Is it registered as an autoload?");
-        return 0; // Return default value in case of failure
-    }
-
-    Variant height = global->get("HEIGHT");
-    if (height.get_type() != Variant::INT) {
-        ERR_PRINT("Global.HEIGHT is not an integer or doesn't exist");
-        return 0; // Return default value if HEIGHT is not valid
-    }
-
-    return height;
-}
-
-void SandSimulation::debug_list_all_nodes() {
-    // Get the SceneTree
-    SceneTree* scene_tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
-    if (!scene_tree) {
-        ERR_PRINT("Failed to get scene tree");
-        return;
-    }
-
-    // Get the root node
-    Node* root = scene_tree->get_root();
-    if (!root) {
-        ERR_PRINT("Failed to get root node");
-        return;
-    }
-
-    // Print root name
-    UtilityFunctions::print("Root node: ", root->get_name());
-
-    // List all direct children of root
-    UtilityFunctions::print("Direct children of root:");
-    for (int i = 0; i < root->get_child_count(); i++) {
-        Node* child = root->get_child(i);
-        UtilityFunctions::print(" - ", child->get_name(), " (", child->get_class(), ")");
-    }
-
-}
-
-int SandSimulation::get_width() {
-    // Access the global WIDTH constant from GDScript
-    SceneTree* scene_tree = get_tree();
-    if (!scene_tree) {
-        ERR_PRINT("Failed to get scene tree");
-        return 0;
-    }
-
-    Node* root = scene_tree->get_root();
-    if (!root) {
-        ERR_PRINT("Failed to get root node");
-        return 0;
-    }
-
-    // Try different ways to get the Global node
-    Node* global = nullptr;
-
-    // Option 1: Use get_node_internal with an explicit cast
-    global = root->get_node_internal(NodePath("Global"));
-
-
-    // If that fails, try option 2: Get child by name
-    if (!global) {
-        for (int i = 0; i < root->get_child_count(); i++) {
-            Node* child = root->get_child(i);
-            if (child->get_name() == godot::StringName("Global")) {
-                global = child;
-                break;
-            }
-        }
-    }
-
-    // Check if we found the node
-    if (!global) {
-        ERR_PRINT("Failed to get Global autoload node. Is it registered as an autoload?");
-        return 0;
-    }
-
-    Variant width = global->get("WIDTH");
-    if (width.get_type() != Variant::INT) {
-        ERR_PRINT("Global.WIDTH is not an integer or doesn't exist");
-        return 0; // Return default value if WIDTH is not valid
-    }
-
-    return width;
-}
-
-int SandSimulation::get_height() {
-    // Access the global HEIGHT constant from GDScript
-  // Access the global WIDTH constant from GDScript
-    SceneTree* scene_tree = get_tree();
-    if (!scene_tree) {
-        ERR_PRINT("Failed to get scene tree");
-        return 0;
-    }
-
-    Node* root = scene_tree->get_root();
-    if (!root) {
-        ERR_PRINT("Failed to get root node");
-        return 0;
-    }
-
-    // Try different ways to get the Global node
-    Node* global = nullptr;
-
-    // Option 1: Use get_node_internal with an explicit cast
-    global = Object::cast_to<Node>(root->get_node_internal(NodePath("Global")));
-
-    // If that fails, try option 2: Get child by name
-    if (!global) {
-        for (int i = 0; i < root->get_child_count(); i++) {
-            Node* child = root->get_child(i);
-            if (child->get_name() == godot::StringName("Global")) {
-                global = child;
-                break;
-            }
-        }
-    }
-
-    // Check if we found the node
-    if (!global) {
-        ERR_PRINT("Failed to get Global autoload node. Is it registered as an autoload?");
-        return 0;
-    }
-
-    Variant height = global->get("HEIGHT");
-    if (height.get_type() != Variant::INT) {
-        ERR_PRINT("Global.HEIGHT is not an integer or doesn't exist");
-        return 0; // Return default value if HEIGHT is not valid
-    }
-
-    return height;
-}*/
-
 int SandSimulation::get_width() const {
     return simulation_width;
 }
@@ -201,6 +37,22 @@ int SandSimulation::get_height() const {
     return simulation_height;
 }
 
+int SandSimulation::chunk_index_from_pos(int pos) const {
+    const int x = pos % simulation_width;
+    const int y = pos / simulation_width;
+    return (y / CHUNK_SIZE) * chunks_x + (x / CHUNK_SIZE);
+}
+
+void SandSimulation::add_to_chunk(int grid, int pos) {
+    const int ci = chunk_index_from_pos(pos);
+    ++chunk_counts[grid][ci];
+}
+
+
+void SandSimulation::remove_from_chunk(int grid, int pos) {
+    const int ci = chunk_index_from_pos(pos);
+    if (chunk_counts[grid][ci]) --chunk_counts[grid][ci];
+}
 
 
 
@@ -211,15 +63,21 @@ void SandSimulation::_ready() {
 }
 
 void SandSimulation::resize_simulation(int width, int height) {
-
     simulation_width  = width;
     simulation_height = height;
+
+    // ----- chunk geometry -----
+    chunks_x = (width  + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    chunks_y = (height + CHUNK_SIZE - 1) / CHUNK_SIZE;
 
     // Initialize sand grids
     for (int i = 0; i < 2; i++) {
         sand_grids[i].resize(width * height);
         sand_grids[i].fill(SAND_EMPTY);
+        chunk_counts[i].resize(chunks_x * chunks_y);
+        chunk_counts[i].fill(0);
     }
+
 }
 
 void SandSimulation::_process(double delta) {
@@ -231,8 +89,9 @@ void SandSimulation::_process(double delta) {
 
 
 void SandSimulation::update_sand() {
-    int width = get_width();
+    int width  = get_width();
     int height = get_height();
+
 
     // Add any new sand pixels to the active grid
     for (int i = 0; i < active_pixels.size(); i++) {
@@ -240,6 +99,8 @@ void SandSimulation::update_sand() {
         const int pos        = pos_type[0];
         const int sand_type  = pos_type[1];
         sand_grids[active_grid].set(pos, sand_type);
+        // increase number of active cells in chunk pos
+        add_to_chunk(active_grid, pos);
     }
     active_pixels.clear();
 
@@ -250,101 +111,88 @@ void SandSimulation::update_sand() {
     grid_new.fill(SAND_EMPTY);
 
 
-    // Process bottom row (can't move further down)
-    const int bottom_row = height - 1;
-    const int bottom_row_offset = bottom_row * width;
-    for (int x = 0; x < width; x++) {
-        const int pos = x + bottom_row_offset;
-        grid_new.set(pos, grid_old[pos]);
+    PackedInt32Array& chunk_old  = chunk_counts[    active_grid];
+    PackedInt32Array& chunk_new  = chunk_counts[1 - active_grid];
+    chunk_new = chunk_old.duplicate();
+
+    int num_active_chunks = 0;
+    for (auto chunk : chunk_new) if (chunk) num_active_chunks++;
+
+    UtilityFunctions::print(num_active_chunks, "/", chunk_new.size(), " active chunks");
+
+
+    /* -------------------------------------------------------------
+     * 3)  Copy the absolute bottom row – cells there never move
+     * ----------------------------------------------------------- */
+    if (height > 0) {
+        const int bottom_off = (height - 1) * width;
+        for (int x = 0; x < width; ++x) {
+            const int pos = bottom_off + x;
+            const uint8_t t = grid_old[pos];
+            grid_new.set(pos, t);
+        }
     }
 
+    /* ----  2) iterate chunks bottom‑up ---- */
+    for (int cy = chunks_y - 1; cy >= 0; --cy) {
+        int y0 = cy * CHUNK_SIZE;
+        int y1 = MIN(y0 + CHUNK_SIZE, height) - 1;
+        if (y1 == height - 1) --y1;                                // drop bottom row
+        if (y1 < y0) continue;
 
-    // --- First Pass: Update "Red" Cells where (x+y) % 2 == 0 ---
-    for (int y = height - 2; y >= 0; y--) {
-        const int row_offset       = y * width;
-        const int row_below_offset = (y + 1) * width;
-        for (int x = 0; x < width; x++) {
-            if (((x + y) & 1) != 0)  // Skip non-red cells in this pass.
-                continue;
 
-            const int pos = row_offset + x;
-            const int sand_type = grid_old[pos];
+        /* ---------- first pass : red cells ---------- */
+        for (int y = y1; y >= y0; --y) {
+            const int ro = y * width;
+            const int rob = ro + width;
 
-            // If the current cell is empty, nothing to do.
-            if (sand_type == SAND_EMPTY)
-                continue;
+            for (int cx = 0; cx < chunks_x; ++cx) {
+                const int chunk_id = cy * chunks_x + cx;
+                if (chunk_old[chunk_id] == 0) continue;   // skip empty
 
-            // Try to move down if possible.
-            int below = x + row_below_offset;
-            if (grid_old[below] == SAND_EMPTY) {
-                grid_new.set(below, sand_type);
-                continue;
-            }
+                int x0 = cx * CHUNK_SIZE;
+                int x1 = MIN(x0 + CHUNK_SIZE, width) - 1;
 
-            // Determine the status of the diagonals.
-            bool left_empty  = (x > 0)         && (grid_new[row_below_offset + (x - 1)] == SAND_EMPTY);
-            bool right_empty = (x < width - 1)   && (grid_new[row_below_offset + (x + 1)] == SAND_EMPTY);
+                for (int x = x0; x <= x1; ++x) {
 
-            // When both directions are possible, pick randomly.
-            if (left_empty && right_empty) {
-                if (UtilityFunctions::randi() & 1)
-                    grid_new.set(row_below_offset + (x - 1), sand_type);
-                else
-                    grid_new.set(row_below_offset + (x + 1), sand_type);
-            } else if (left_empty) {
-                grid_new.set(row_below_offset + (x - 1), sand_type);
-            } else if (right_empty) {
-                grid_new.set(row_below_offset + (x + 1), sand_type);
-            } else {
-                // No movement; keep the sand in its original place.
-                grid_new.set(pos, sand_type);
+
+                    const int pos = ro + x;
+                    const uint8_t t = grid_old[pos];
+                    if (t == SAND_EMPTY) continue;
+
+                    int dest = pos;
+                    const int below = rob + x;
+                    if (grid_new[below] == SAND_EMPTY) {
+                        dest = below;
+                    } else {
+                        bool left_empty  = (x > 0)         && (grid_new[rob + x - 1] == SAND_EMPTY);
+                        bool right_empty = (x < width - 1) && (grid_new[rob + x + 1] == SAND_EMPTY);
+                        if (left_empty && right_empty)
+                            dest = (UtilityFunctions::randi() & 1) ? (rob + x - 1) : (rob + x + 1);
+                        else if (left_empty)
+                            dest = rob + x - 1;
+                        else if (right_empty)
+                            dest = rob + x + 1;
+                        else
+                            dest = pos;
+                    }
+
+                    grid_new.set(dest, t);
+
+                    if (pos != dest) {
+                        remove_from_chunk(1 - active_grid, pos);
+                        add_to_chunk(1 - active_grid, dest);
+                    } else {
+                        remove_from_chunk(1 - active_grid, pos);
+                    }
+                }
             }
         }
     }
 
-    // --- Second Pass: Update "Black" Cells where (x+y) % 2 == 1 ---
-    // In this pass, we now read any red-cell updates that have been written into grid_new.
-    for (int y = height - 2; y >= 0; y--) {
-        const int row_offset       = y * width;
-        const int row_below_offset = (y + 1) * width;
-        for (int x = 0; x < width; x++) {
-            if (((x + y) & 1) == 0)  // Skip the red cells in this pass.
-                continue;
-
-            const int pos = row_offset + x;
-            const int sand_type = grid_old[pos];
-
-            if (sand_type == SAND_EMPTY)
-                continue;
-
-            // Try to move down.
-            int below = x + row_below_offset;
-            if (grid_old[below] == SAND_EMPTY) {
-                grid_new.set(below, sand_type);
-                continue;
-            }
-
-            // Check diagonal movements.
-            bool left_empty  = (x > 0)         && (grid_new[row_below_offset + (x - 1)] == SAND_EMPTY);
-            bool right_empty = (x < width - 1) && (grid_new[row_below_offset + (x + 1)] == SAND_EMPTY);
-
-            if (left_empty && right_empty) {
-                if (UtilityFunctions::randi() & 1)
-                    grid_new.set(row_below_offset + (x - 1), sand_type);
-                else
-                    grid_new.set(row_below_offset + (x + 1), sand_type);
-            } else if (left_empty) {
-                grid_new.set(row_below_offset + (x - 1), sand_type);
-            } else if (right_empty) {
-                grid_new.set(row_below_offset + (x + 1), sand_type);
-            } else {
-                grid_new.set(pos, sand_type);
-            }
-        }
-    }
-
-    // Swap grids
     active_grid = 1 - active_grid;
+
+
 }
 
 void SandSimulation::spawn_sand(const Vector2& coords, int radius, int sand_type) {

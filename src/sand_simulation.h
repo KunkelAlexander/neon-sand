@@ -24,6 +24,14 @@ private:
     uint32_t simulation_width;
     uint32_t simulation_height;
 
+    // Number of chunks in X/Y and the per–chunk activity counters
+    static const uint32_t CHUNK_SIZE = 32;          // 32 also works – just change here
+    uint32_t chunks_x;
+    uint32_t chunks_y;
+    PackedInt32Array chunk_counts[2];               // parallel to sand_grids[2]
+
+
+
     // The grid stores an integer per pixel (0 = empty, otherwise the sand type)
     PackedByteArray sand_grids[2];
     int active_grid = 0;
@@ -37,7 +45,10 @@ private:
     // Helper functions
     int get_width() const;
     int get_height() const;
-    bool has_zero_byte(uint64_t x);
+    int chunk_index_from_pos(int pos) const;
+
+    void add_to_chunk(int grid, int pos);
+    void remove_from_chunk(int grid, int pos);
 
 protected:
     static void _bind_methods();
