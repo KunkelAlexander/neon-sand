@@ -45,13 +45,12 @@ int SandSimulation::chunk_index_from_pos(int pos) const {
 
 void SandSimulation::add_to_chunk(int grid, int pos) {
     const int ci = chunk_index_from_pos(pos);
-    ++chunk_counts[grid][ci];
+    is_chunk_active[grid][ci] |= true;
 }
 
 
 void SandSimulation::remove_from_chunk(int grid, int pos) {
     const int ci = chunk_index_from_pos(pos);
-    if (chunk_counts[grid][ci]) --chunk_counts[grid][ci];
 }
 
 
@@ -67,15 +66,15 @@ void SandSimulation::resize_simulation(int width, int height) {
     simulation_height = height;
 
     // ----- chunk geometry -----
-    chunks_x = (width  + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    chunks_x = (width + CHUNK_SIZE - 1) / CHUNK_SIZE;
     chunks_y = (height + CHUNK_SIZE - 1) / CHUNK_SIZE;
 
     // Initialize sand grids
     for (int i = 0; i < 2; i++) {
         sand_grids[i].resize(width * height);
         sand_grids[i].fill(SAND_EMPTY);
-        chunk_counts[i].resize(chunks_x * chunks_y);
-        chunk_counts[i].fill(0);
+        is_chunk_active[i].resize(chunks_x * chunks_y);
+        is_chunk_active[i].fill(0);
     }
 
 }
@@ -106,45 +105,38 @@ void SandSimulation::update_sand() {
 
 
     // Instead of using active cells, we'll process the entire grid
-    const PackedByteArray& grid_old  = sand_grids[    active_grid];
-          PackedByteArray& grid_new  = sand_grids[1 - active_grid];
-    grid_new.fill(SAND_EMPTY);
+    PackedByteArray& grid_old  = sand_grids[    active_grid];
+    PackedByteArray& grid_new  = sand_grids[1 - active_grid];
+    grid_new = grid_old.duplicate();
 
 
-    PackedInt32Array& chunk_old  = chunk_counts[    active_grid];
-    PackedInt32Array& chunk_new  = chunk_counts[1 - active_grid];
-    chunk_new = chunk_old.duplicate();
+    PackedByteArray& chunk_old  = is_chunk_active[    active_grid];
+    PackedByteArray& chunk_new  = is_chunk_active[1 - active_grid];
+    chunk_new.fill(0);
+
 
     int num_active_chunks = 0;
-    for (auto chunk : chunk_new) if (chunk) num_active_chunks++;
+    int active_cells = 0;
+    int cells = 0;
+    for (auto chunk : chunk_old) {if (chunk) num_active_chunks++; active_cells+=chunk;}
+    for (auto cell : grid_old) cells += (cell != SAND_EMPTY);
 
-    UtilityFunctions::print(num_active_chunks, "/", chunk_new.size(), " active chunks");
+    if (cells)
+    UtilityFunctions::print(num_active_chunks, "/", chunk_old.size(), " active chunks  -- ", active_cells, " active cells ", cells, "/", grid_new.size(), " total cells");
 
-
-    /* -------------------------------------------------------------
-     * 3)  Copy the absolute bottom row – cells there never move
-     * ----------------------------------------------------------- */
-    if (height > 0) {
-        const int bottom_off = (height - 1) * width;
-        for (int x = 0; x < width; ++x) {
-            const int pos = bottom_off + x;
-            const uint8_t t = grid_old[pos];
-            grid_new.set(pos, t);
-        }
-    }
 
     /* ----  2) iterate chunks bottom‑up ---- */
     for (int cy = chunks_y - 1; cy >= 0; --cy) {
         int y0 = cy * CHUNK_SIZE;
         int y1 = MIN(y0 + CHUNK_SIZE, height) - 1;
-        if (y1 == height - 1) --y1;                                // drop bottom row
+        if (y1 == height - 1) --y1; // drop bottom row
         if (y1 < y0) continue;
 
 
-        /* ---------- first pass : red cells ---------- */
         for (int y = y1; y >= y0; --y) {
-            const int ro = y * width;
+            const int ro  = y * width;
             const int rob = ro + width;
+            const int roa = ro - width;
 
             for (int cx = 0; cx < chunks_x; ++cx) {
                 const int chunk_id = cy * chunks_x + cx;
@@ -157,9 +149,10 @@ void SandSimulation::update_sand() {
 
 
                     const int pos = ro + x;
-                    const uint8_t t = grid_old[pos];
+                    const uint8_t t = grid_new[pos];
                     if (t == SAND_EMPTY) continue;
 
+                    // check possible sand movement
                     int dest = pos;
                     const int below = rob + x;
                     if (grid_new[below] == SAND_EMPTY) {
@@ -177,13 +170,14 @@ void SandSimulation::update_sand() {
                             dest = pos;
                     }
 
-                    grid_new.set(dest, t);
-
                     if (pos != dest) {
-                        remove_from_chunk(1 - active_grid, pos);
-                        add_to_chunk(1 - active_grid, dest);
-                    } else {
-                        remove_from_chunk(1 - active_grid, pos);
+                        // sand moves
+                        grid_new.set(pos, SAND_EMPTY);
+                        grid_new.set(dest, t);
+                        const int above = roa + x;
+                        if (above >= 0) add_to_chunk     (1 - active_grid, above);
+                        add_to_chunk     (1 - active_grid, pos);
+                        add_to_chunk     (1 - active_grid, dest);
                     }
                 }
             }

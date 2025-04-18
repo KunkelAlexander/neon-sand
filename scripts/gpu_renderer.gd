@@ -8,7 +8,6 @@ var type_image: Image
 var width: int
 var height: int 
 
-const SIM_SCALE = 4
 
 func _ready():
 	# Load the shadergodo
@@ -20,8 +19,8 @@ func _ready():
 	shader_material.shader = shader
 	
 	var screen_size = get_viewport_rect().size
-	width = int(screen_size.x / SIM_SCALE)
-	height = int(screen_size.y / SIM_SCALE)
+	width = int(screen_size.x / Global.SIM_SCALE)
+	height = int(screen_size.y / Global.SIM_SCALE)
 	
 	# Recreate image and texture and rebind it
 	type_image   = Image.create(width, height, false, Image.FORMAT_R8)
@@ -60,8 +59,8 @@ func _ready():
 
 func _resize_simulation():
 	var screen_size = get_viewport_rect().size
-	width = int(screen_size.x / SIM_SCALE)
-	height = int(screen_size.y / SIM_SCALE)
+	width = int(screen_size.x / Global.SIM_SCALE)
+	height = int(screen_size.y / Global.SIM_SCALE)
 	
 	print("New simulation size: %dx%d" % [width, height])
 
