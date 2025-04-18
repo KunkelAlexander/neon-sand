@@ -132,18 +132,18 @@ void SandSimulation::update_sand() {
         if (y1 == height - 1) --y1; // drop bottom row
         if (y1 < y0) continue;
 
+        for (int cx = 0; cx < chunks_x; ++cx) {
+            const int chunk_id = cy * chunks_x + cx;
+            if (chunk_old[chunk_id] == 0) continue;   // skip empty
 
-        for (int y = y1; y >= y0; --y) {
-            const int ro  = y * width;
-            const int rob = ro + width;
-            const int roa = ro - width;
+            int x0 = cx * CHUNK_SIZE;
+            int x1 = MIN(x0 + CHUNK_SIZE, width) - 1;
 
-            for (int cx = 0; cx < chunks_x; ++cx) {
-                const int chunk_id = cy * chunks_x + cx;
-                if (chunk_old[chunk_id] == 0) continue;   // skip empty
+            for (int y = y1; y >= y0; --y) {
+                const int ro  = y * width;
+                const int rob = ro + width;
+                const int roa = ro - width;
 
-                int x0 = cx * CHUNK_SIZE;
-                int x1 = MIN(x0 + CHUNK_SIZE, width) - 1;
 
                 for (int x = x0; x <= x1; ++x) {
 
@@ -155,11 +155,11 @@ void SandSimulation::update_sand() {
                     // check possible sand movement
                     int dest = pos;
                     const int below = rob + x;
-                    if (grid_new[below] == SAND_EMPTY) {
+                    if (grid_old[below] == SAND_EMPTY) {
                         dest = below;
                     } else {
-                        bool left_empty  = (x > 0)         && (grid_new[rob + x - 1] == SAND_EMPTY);
-                        bool right_empty = (x < width - 1) && (grid_new[rob + x + 1] == SAND_EMPTY);
+                        bool left_empty  = (x > 0)         && (grid_old[rob + x - 1] == SAND_EMPTY);
+                        bool right_empty = (x < width - 1) && (grid_old[rob + x + 1] == SAND_EMPTY);
                         if (left_empty && right_empty)
                             dest = (UtilityFunctions::randi() & 1) ? (rob + x - 1) : (rob + x + 1);
                         else if (left_empty)
@@ -170,12 +170,13 @@ void SandSimulation::update_sand() {
                             dest = pos;
                     }
 
-                    if (pos != dest) {
+                    if (pos != dest && grid_new[dest] == SAND_EMPTY) {
                         // sand moves
                         grid_new.set(pos, SAND_EMPTY);
                         grid_new.set(dest, t);
                         const int above = roa + x;
-                        if (above >= 0) add_to_chunk     (1 - active_grid, above);
+                        if (above >= 0)
+                        add_to_chunk     (1 - active_grid, above);
                         add_to_chunk     (1 - active_grid, pos);
                         add_to_chunk     (1 - active_grid, dest);
                     }
