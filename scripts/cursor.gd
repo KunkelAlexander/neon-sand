@@ -57,8 +57,5 @@ func _process(delta):
 	if Input.is_action_pressed("key_exit"):
 		get_tree().quit()
 
-			
-
-
 func _draw():
 	draw_circle(Vector2.ZERO, brush_size*Global.SIM_SCALE, Color(1, 1, 1), false)
