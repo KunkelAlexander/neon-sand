@@ -121,8 +121,8 @@ void SandSimulation::update_sand() {
     for (auto chunk : chunk_old) {if (chunk) num_active_chunks++; active_cells+=chunk;}
     for (auto cell : grid_old) cells += (cell != SAND_EMPTY);
 
-    if (cells)
-    UtilityFunctions::print(num_active_chunks, "/", chunk_old.size(), " active chunks  -- ", active_cells, " active cells ", cells, "/", grid_new.size(), " total cells");
+    //if (cells)
+    //UtilityFunctions::print(num_active_chunks, "/", chunk_old.size(), " active chunks  -- ", active_cells, " active cells ", cells, "/", grid_new.size(), " total cells");
 
 
     /* ----  2) iterate chunks bottom‑up ---- */
@@ -170,7 +170,7 @@ void SandSimulation::update_sand() {
                             dest = pos;
                     }
 
-                    if (pos != dest && grid_new[dest] == SAND_EMPTY) {
+                    if (pos != dest) {
                         // sand moves
                         grid_new.set(pos, SAND_EMPTY);
                         grid_new.set(dest, t);

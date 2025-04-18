@@ -111,7 +111,7 @@ func create_color_palette_texture():
 				Color.from_hsv(0.58, 0.7, 0.7),
 				Color.from_hsv(0.6, 0.6, 0.5),
 				Color.from_hsv(0.15, 0.4, 0.3),
-				Color.from_hsv(0.15, 0.4, 0.3)
+				Color.from_hsv(0.3, 0.8, 0.6),
 			]
 		"ocean":
 			base_colors = [

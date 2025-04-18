@@ -6,7 +6,7 @@ extends Node2D
 
 var sand_type = 0
 var time_passed := 0.0
-var brush_size: float = 10.0
+var brush_size: float = 30.0
 var paint_mode: bool = true
 
 # Track touch points' positions and previous distances
