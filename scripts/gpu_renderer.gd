@@ -79,21 +79,65 @@ func _resize_simulation():
 	var simulation = get_parent().get_node("SandSimulation")
 	simulation.resize_simulation(width, height)
 
-
 func create_color_palette_texture():
 	var palette_size = 255
 	var base_colors := []
-	var num_base = 8  # Number of control colors
-	randomize()
-	# Generate base pastel/neon colors
-	for i in range(num_base):
-		var hue = randf()
-		var sat = randf_range(0.4, 1.0)
-		var val = randf_range(0.8, 1.0)
-		base_colors.append(Color.from_hsv(hue, sat, val))
+	var num_base = 9
 	
-	var palette_image = Image.create(palette_size, 1, false, Image.FORMAT_RGBA8)
+	randomize()
+	var themes = ["sunset", "forest", "ocean"]
+	var theme = themes.pick_random()
 
+	match theme:
+		"sunset":
+			base_colors = [
+				Color.from_hsv(0.02, 0.8, 0.9),  # Warm orange
+				Color.from_hsv(0.05, 0.9, 0.9),
+				Color.from_hsv(0.08, 0.7, 0.95),
+				Color.from_hsv(0.12, 0.5, 1.0),
+				Color.from_hsv(0.65, 0.7, 0.9),
+				Color.from_hsv(0.7, 0.8, 0.8),
+				Color.from_hsv(0.75, 0.9, 0.6),
+				Color.from_hsv(0.8, 1.0, 0.5),
+				Color.from_hsv(0.02, 0.8, 0.9),  # Warm orange
+			]
+		"forest":
+			base_colors = [
+				Color.from_hsv(0.3, 0.8, 0.6),
+				Color.from_hsv(0.33, 0.9, 0.4),
+				Color.from_hsv(0.35, 0.7, 0.7),
+				Color.from_hsv(0.1, 0.6, 0.5),
+				Color.from_hsv(0.12, 0.5, 0.8),
+				Color.from_hsv(0.58, 0.7, 0.7),
+				Color.from_hsv(0.6, 0.6, 0.5),
+				Color.from_hsv(0.15, 0.4, 0.3),
+				Color.from_hsv(0.15, 0.4, 0.3)
+			]
+		"ocean":
+			base_colors = [
+				Color.from_hsv(0.5, 0.7, 0.9),
+				Color.from_hsv(0.55, 0.8, 0.8),
+				Color.from_hsv(0.6, 0.9, 0.7),
+				Color.from_hsv(0.63, 1.0, 0.5),
+				Color.from_hsv(0.58, 0.6, 0.8),
+				Color.from_hsv(0.52, 0.7, 0.7),
+				Color.from_hsv(0.6, 0.4, 0.9),
+				Color.from_hsv(0.5, 0.8, 0.6),
+				Color.from_hsv(0.5, 0.7, 0.9)
+			]
+
+	# Apply slight random variations to colors
+	for i in range(num_base):
+		var color = base_colors[i]
+		var hue_shift = randf_range(-0.02, 0.02)
+		var sat_shift = randf_range(-0.1, 0.1)
+		var val_shift = randf_range(-0.1, 0.1)
+		var h = clamp(color.h + hue_shift, 0.0, 1.0)
+		var s = clamp(color.s + sat_shift, 0.0, 1.0)
+		var v = clamp(color.v + val_shift, 0.0, 1.0)
+		base_colors[i] = Color.from_hsv(h, s, v)
+
+	var palette_image = Image.create(palette_size, 1, false, Image.FORMAT_RGBA8)
 	for i in range(palette_size):
 		var t = float(i) / (palette_size - 1) * (num_base - 1)
 		var index = int(t)
@@ -104,6 +148,7 @@ func create_color_palette_texture():
 
 		var interpolated = c1.lerp(c2, frac)
 		palette_image.set_pixel(i, 0, interpolated)
+
 	palette_image.set_pixel(0, 0, Color(0, 0, 0, 0))
 	color_palette_texture = ImageTexture.create_from_image(palette_image)
 

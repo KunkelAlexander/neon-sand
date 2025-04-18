@@ -149,7 +149,7 @@ void SandSimulation::update_sand() {
 
 
                     const int pos = ro + x;
-                    const uint8_t t = grid_new[pos];
+                    const uint8_t t = grid_old[pos];
                     if (t == SAND_EMPTY) continue;
 
                     // check possible sand movement
@@ -170,7 +170,7 @@ void SandSimulation::update_sand() {
                             dest = pos;
                     }
 
-                    if (pos != dest) {
+                    if (pos != dest && grid_new[dest] == SAND_EMPTY) {
                         // sand moves
                         grid_new.set(pos, SAND_EMPTY);
                         grid_new.set(dest, t);
