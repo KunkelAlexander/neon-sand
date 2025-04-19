@@ -60,6 +60,7 @@ layout_mode = 3
 anchors_preset = 0
 
 [node name="FPS" type="Label" parent="CanvasLayer/UI"]
+visible = false
 layout_mode = 0
 offset_left = 32.0
 offset_top = 24.0

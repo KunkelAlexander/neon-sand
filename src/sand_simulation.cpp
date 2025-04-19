@@ -115,17 +115,8 @@ void SandSimulation::update_sand() {
     chunk_new.fill(0);
 
 
-    int num_active_chunks = 0;
-    int active_cells = 0;
-    int cells = 0;
-    for (auto chunk : chunk_old) {if (chunk) num_active_chunks++; active_cells+=chunk;}
-    for (auto cell : grid_old) cells += (cell != SAND_EMPTY);
-
-    //if (cells)
-    //UtilityFunctions::print(num_active_chunks, "/", chunk_old.size(), " active chunks  -- ", active_cells, " active cells ", cells, "/", grid_new.size(), " total cells");
-
-
     /* ----  2) iterate chunks bottom‑up ---- */
+    // RED CELLS in checkerboard pattern
     for (int cy = chunks_y - 1; cy >= 0; --cy) {
         int y0 = cy * CHUNK_SIZE;
         int y1 = MIN(y0 + CHUNK_SIZE, height) - 1;
@@ -191,6 +182,7 @@ void SandSimulation::update_sand() {
     }
 
 
+    // BLACK cells in checkerboard pattern
     for (int cy = chunks_y - 1; cy >= 0; --cy) {
         int y0 = cy * CHUNK_SIZE;
         int y1 = MIN(y0 + CHUNK_SIZE, height) - 1;
@@ -214,7 +206,7 @@ void SandSimulation::update_sand() {
 
                 for (int x = x0; x <= x1; ++x) {
 
-                    if (((x + y) & 1) == 0)  // Skip non-red cells in this pass.
+                    if (((x + y) & 1) == 0)  // Skip red cells in this pass.
                     continue;
 
                     const int pos = ro + x;
