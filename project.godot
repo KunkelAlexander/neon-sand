@@ -10,10 +10,11 @@ config_version=5
 
 [application]
 
-config/name="NeonSand"
+config/name="Neon Sand"
 run/main_scene="res://scenes/cursor.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-config/icon="res://icon.svg"
+boot_splash/image="uid://7ypr2ck0coxt"
+config/icon="uid://dg1xu8e7urc62"
 
 [autoload]
 
