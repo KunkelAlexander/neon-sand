@@ -92,8 +92,30 @@ void SandSimulation::resize_simulation(int new_width, int new_height) {
         is_chunk_active[i].fill(1);
     }
 
-    // Make sure our permutation array is big enough
-    x_permutation.resize(MAX(CHUNK_SIZE, x_permutation.size()));
+
+    for (int k = 0; k < N_PERMUTATIONS; ++k) {
+        for (int l = 0; l < 2; ++l) {
+
+            int chunk_size = CHUNK_SIZE;
+            if (l == 1) chunk_size = new_width % CHUNK_SIZE;
+
+            chunk_size_permutations[l][k].resize(MAX(chunk_size, chunk_size_permutations[l][k].size()));
+
+            // set up the permutation array
+            for (int i = 0; i < chunk_size; ++i) {
+                chunk_size_permutations[l][k].set(i, i);
+            }
+
+            // shuffle the permutation array
+            for (int i = chunk_size - 1; i > 0; --i) {
+                int j = UtilityFunctions::randi() % (i + 1);
+                int temp = chunk_size_permutations[l][k][i];
+                chunk_size_permutations[l][k].set(i, chunk_size_permutations[l][k][j]);
+                chunk_size_permutations[l][k].set(j, temp);
+            }
+        }
+    }
+
 
     // Restore previous sand data where it fits
     if (has_previous_data) {
@@ -174,22 +196,10 @@ void SandSimulation::update_sand() {
                 int x1 = MIN(x0 + CHUNK_SIZE, width);
 
                 const int chunk_width = x1 - x0;
-
-                // set up the permutation array
+                const int chunk_width_index = (chunk_width == CHUNK_SIZE) ? 0 : 1;
+                int k = UtilityFunctions::randi() % (N_PERMUTATIONS);
                 for (int i = 0; i < chunk_width; ++i) {
-                    x_permutation.set(i, i);
-                }
-
-                // shuffle the permutation array
-                for (int i = chunk_width - 1; i > 0; --i) {
-                    int j = UtilityFunctions::randi() % (i + 1);
-                    int temp = x_permutation[i];
-                    x_permutation.set(i, x_permutation[j]);
-                    x_permutation.set(j, temp);
-                }
-
-                for (int i = 0; i < chunk_width; ++i) {
-                    const int x = x0 + x_permutation[i];
+                    const int x = x0 + chunk_size_permutations[chunk_width_index][k][i];
                     const int pos = ro + x;
                     const uint8_t t = grid_old[pos];
                     if (t == SAND_EMPTY) continue;
