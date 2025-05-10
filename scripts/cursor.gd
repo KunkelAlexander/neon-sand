@@ -10,8 +10,13 @@ var brush_size: float = 30.0
 var paint_mode: bool = true
 
 # Track touch points' positions and previous distances
-var touch_positions := {}
 var last_touch_distance := 0.0
+
+# Track touch points for pinch-to-zoom
+var touch_positions = {}
+var min_brush_size = 5.0
+var max_brush_size = 50.0
+var pinch_sensitivity = 0.5  # Adjust this to control sensitivity
 
 # Initialize variables for pinch gesture handling
 var last_gesture_scale := 1.0
@@ -57,5 +62,45 @@ func _process(delta):
 	if Input.is_action_pressed("key_exit"):
 		get_tree().quit()
 
+func _input(event):
+	# Handle mouse wheel for brush size adjustment
+	if event is InputEventScreenTouch:
+		handle_touch(event)
+
+
+func adjust_brush_size(amount):
+	brush_size = clamp(brush_size + amount, min_brush_size, max_brush_size)
+	queue_redraw()
+
+func handle_touch(event: InputEventScreenTouch):
+	if event.pressed:
+		# Store the touch position when pressed
+		touch_positions[event.index] = event.position
+		
+		# If we have exactly 2 touches after adding this touch, capture initial distance
+		if touch_positions.size() == 2:
+			var positions = touch_positions.values()
+			last_touch_distance = positions[0].distance_to(positions[1])
+	else:
+		touch_positions[event.index] = event.position
+		# Before removing the touch position
+		# If we have exactly 2 touches before removal and we're releasing one of them
+		if touch_positions.size() == 2:
+			var positions = touch_positions.values()
+			var current_distance = positions[0].distance_to(positions[1])
+			
+			# Calculate pinch scale and adjust brush size
+			if last_touch_distance > 0:
+				var distance_delta = current_distance - last_touch_distance
+			
+				var size_change = distance_delta * pinch_sensitivity
+				adjust_brush_size(size_change)
+		
+		# Remove the touch position when released
+		touch_positions.erase(event.index)
+		
+		# Reset last distance if we don't have 2 touches anymore
+		if touch_positions.size() != 2:
+			last_touch_distance = 0.0
 func _draw():
 	draw_circle(Vector2.ZERO, brush_size*Global.SIM_SCALE, Color(1, 1, 1), false)
