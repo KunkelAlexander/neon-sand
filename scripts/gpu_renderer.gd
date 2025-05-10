@@ -11,7 +11,7 @@ var height: int
 
 func _ready():
 	# Load the shadergodo
-	var shader = load("res://shaders/sand_shader.gdshader")
+	var shader = load("res://shaders/glowing_sand_shader.gdshader")
 	if shader == null:
 		push_error("Failed to load sand shader!")
 		return
@@ -85,7 +85,7 @@ func create_color_palette_texture():
 	var num_base = 9
 	
 	randomize()
-	var themes = ["sunset", "forest", "ocean"]
+	var themes = ["sunset", "forest", "ocean", "night", "desert", "space", "random"]
 	var theme = themes.pick_random()
 
 	match theme:
@@ -125,7 +125,55 @@ func create_color_palette_texture():
 				Color.from_hsv(0.5, 0.8, 0.6),
 				Color.from_hsv(0.5, 0.7, 0.9)
 			]
-
+		"night":
+			base_colors = [
+				Color.from_hsv(0.67, 0.9, 0.3),  # Deep blue
+				Color.from_hsv(0.72, 0.8, 0.2),
+				Color.from_hsv(0.75, 0.7, 0.4),
+				Color.from_hsv(0.8, 0.6, 0.15),
+				Color.from_hsv(0.85, 0.5, 0.1),
+				Color.from_hsv(0.9, 0.3, 0.5),   # Purple
+				Color.from_hsv(0.1, 0.9, 0.9),   # Stars (yellow)
+				Color.from_hsv(0.65, 0.2, 0.8),  # Light blue
+				Color.from_hsv(0.67, 0.9, 0.3)   # Deep blue (closing loop)
+			]
+		"desert":
+			base_colors = [
+				Color.from_hsv(0.08, 0.7, 0.8),  # Sandy orange
+				Color.from_hsv(0.1, 0.8, 0.7),
+				Color.from_hsv(0.05, 0.6, 0.9),
+				Color.from_hsv(0.07, 0.5, 0.5),
+				Color.from_hsv(0.09, 0.4, 0.4),
+				Color.from_hsv(0.11, 0.3, 0.95), # Light tan
+				Color.from_hsv(0.02, 0.8, 0.6),  # Terracotta
+				Color.from_hsv(0.58, 0.7, 0.8),  # Sky blue
+				Color.from_hsv(0.08, 0.7, 0.8)   # Sandy orange (closing loop)
+			]
+		"space":
+			base_colors = [
+				Color.from_hsv(0.7, 0.9, 0.1),   # Deep space blue
+				Color.from_hsv(0.75, 0.8, 0.15),
+				Color.from_hsv(0.8, 0.7, 0.2),   # Purple space
+				Color.from_hsv(0.05, 0.9, 0.9),  # Star yellow
+				Color.from_hsv(0.3, 0.8, 0.7),   # Nebula green
+				Color.from_hsv(0.95, 0.7, 0.6),  # Nebula pink
+				Color.from_hsv(0.6, 0.9, 0.3),   # Cosmic blue
+				Color.from_hsv(0.15, 0.9, 0.9),  # Cosmic orange
+				Color.from_hsv(0.7, 0.9, 0.1)    # Deep space blue (closing loop)
+			]
+		"random":
+			# Create a completely random color palette
+			base_colors = []
+			var first_color = Color.from_hsv(randf(), randf_range(0.5, 1.0), randf_range(0.5, 1.0))
+			base_colors.append(first_color)
+			
+			# Generate 7 more random colors
+			for i in range(7):
+				base_colors.append(Color.from_hsv(randf(), randf_range(0.5, 1.0), randf_range(0.5, 1.0)))
+			
+			# Close the loop with the first color
+			base_colors.append(first_color)
+		
 	# Apply slight random variations to colors
 	for i in range(num_base):
 		var color = base_colors[i]
