@@ -33,8 +33,8 @@ private:
     static const uint32_t CHUNK_SIZE = 32;          // 32 also works – just change here
     uint32_t chunks_x;
     uint32_t chunks_y;
-    PackedByteArray is_chunk_active[2];               // parallel to sand_grids[2]
-
+    PackedByteArray is_chunk_active[2];              // parallel to sand_grids[2]
+    PackedInt32Array x_permutation;                 // store permutations for x-update order
 
 
 

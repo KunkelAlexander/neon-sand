@@ -77,6 +77,7 @@ void SandSimulation::resize_simulation(int width, int height) {
         is_chunk_active[i].fill(0);
     }
 
+    x_permutation.resize(CHUNK_SIZE);
 }
 
 void SandSimulation::_process(double delta) {
@@ -116,7 +117,6 @@ void SandSimulation::update_sand() {
 
 
     /* ----  2) iterate chunks bottom‑up ---- */
-    // RED CELLS in checkerboard pattern
     for (int cy = chunks_y - 1; cy >= 0; --cy) {
         int y0 = cy * CHUNK_SIZE;
         int y1 = MIN(y0 + CHUNK_SIZE, height) - 1;
@@ -135,14 +135,25 @@ void SandSimulation::update_sand() {
                 if (chunk_old[chunk_id] == 0) continue;   // skip empty
 
                 int x0 = cx * CHUNK_SIZE;
-                int x1 = MIN(x0 + CHUNK_SIZE, width) - 1;
+                int x1 = MIN(x0 + CHUNK_SIZE, width);
 
+                const int chunk_width = x1 - x0;
 
-                for (int x = x0; x <= x1; ++x) {
+                // set up the permutation array
+                for (int i = 0; i < chunk_width; ++i) {
+                    x_permutation.set(i, i);
+                }
 
-                    if (((x + y) & 1) != 0)  // Skip non-red cells in this pass.
-                    continue;
+                // shuffle the permutation array
+                for (int i = chunk_width - 1; i > 0; --i) {
+                    int j = UtilityFunctions::randi() % (i + 1);
+                    int temp = x_permutation[i];
+                    x_permutation.set(i, x_permutation[j]);
+                    x_permutation.set(j, temp);
+                }
 
+                for (int i = 0; i < chunk_width; ++i) {
+                    const int x = x0 + x_permutation[i];
                     const int pos = ro + x;
                     const uint8_t t = grid_old[pos];
                     if (t == SAND_EMPTY) continue;
@@ -173,71 +184,6 @@ void SandSimulation::update_sand() {
                         if (above >= 0)    add_to_chunk     (1 - active_grid, above);
                         if (x > 0)         add_to_chunk     (1 - active_grid, x + ro - 1);
                         if (x < width - 1) add_to_chunk     (1 - active_grid, x + ro + 1);
-                        add_to_chunk     (1 - active_grid, pos);
-                        add_to_chunk     (1 - active_grid, dest);
-                    }
-                }
-            }
-        }
-    }
-
-
-    // BLACK cells in checkerboard pattern
-    for (int cy = chunks_y - 1; cy >= 0; --cy) {
-        int y0 = cy * CHUNK_SIZE;
-        int y1 = MIN(y0 + CHUNK_SIZE, height) - 1;
-        if (y1 == height - 1) --y1; // drop bottom row
-        if (y1 < y0) continue;
-
-
-        for (int y = y1; y >= y0; --y) {
-            const int ro  = y * width;
-            const int rob = ro + width;
-            const int roa = ro - width;
-
-
-            for (int cx = 0; cx < chunks_x; ++cx) {
-                const int chunk_id = cy * chunks_x + cx;
-                if (chunk_old[chunk_id] == 0) continue;   // skip empty
-
-                int x0 = cx * CHUNK_SIZE;
-                int x1 = MIN(x0 + CHUNK_SIZE, width) - 1;
-
-
-                for (int x = x0; x <= x1; ++x) {
-
-                    if (((x + y) & 1) == 0)  // Skip red cells in this pass.
-                    continue;
-
-                    const int pos = ro + x;
-                    const uint8_t t = grid_old[pos];
-                    if (t == SAND_EMPTY) continue;
-
-                    // check possible sand movement
-                    int dest = pos;
-                    const int below = rob + x;
-                    if (grid_old[below] == SAND_EMPTY) {
-                        dest = below;
-                    } else {
-                        bool left_empty  = (x > 0)         && (grid_new[rob + x - 1] == SAND_EMPTY);
-                        bool right_empty = (x < width - 1) && (grid_new[rob + x + 1] == SAND_EMPTY);
-                        if (left_empty && right_empty)
-                            dest = (UtilityFunctions::randi() & 1) ? (rob + x - 1) : (rob + x + 1);
-                        else if (left_empty)
-                            dest = rob + x - 1;
-                        else if (right_empty)
-                            dest = rob + x + 1;
-                        else
-                            dest = pos;
-                    }
-
-                    if (pos != dest) {
-                        // sand moves
-                        grid_new.set(pos, SAND_EMPTY);
-                        grid_new.set(dest, t);
-                        const int above = roa + x;
-                        if (above >= 0)
-                        add_to_chunk     (1 - active_grid, above);
                         add_to_chunk     (1 - active_grid, pos);
                         add_to_chunk     (1 - active_grid, dest);
                     }
