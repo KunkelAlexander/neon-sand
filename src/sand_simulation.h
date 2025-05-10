@@ -31,7 +31,7 @@ private:
 
     // Number of chunks in X/Y and the per–chunk activity counters
     static const uint32_t CHUNK_SIZE = 32;          // 32 also works – just change here
-    static const uint32_t N_PERMUTATIONS = 5;
+    static const uint32_t N_PERMUTATIONS = 10;
     uint32_t chunks_x;
     uint32_t chunks_y;
     PackedByteArray is_chunk_active[2];              // parallel to sand_grids[2]

@@ -51,6 +51,9 @@ void fragment() {
     // Average the result
     bloomResult /= count;
 
-    // Mix the original color with the bloom effect
-    COLOR = color + mix(vec4(0.0), bloomResult, bloom_amount);
+    // Mix the original color with the bloom effect if it is not transparent
+	if (0.0 < color.a)
+    	COLOR = color + mix(vec4(0.0), bloomResult, bloom_amount);
+	else
+    	COLOR = mix(vec4(0.0), bloomResult, bloom_amount);
 }

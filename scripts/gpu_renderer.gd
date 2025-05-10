@@ -196,7 +196,7 @@ func create_color_palette_texture():
 
 		var interpolated = c1.lerp(c2, frac)
 		palette_image.set_pixel(i, 0, interpolated)
-
+	# Bloom will mix with this
 	palette_image.set_pixel(0, 0, Color(0, 0, 0, 0))
 	color_palette_texture = ImageTexture.create_from_image(palette_image)
 
