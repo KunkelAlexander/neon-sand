@@ -4,7 +4,7 @@ uniform sampler2D sand_texture;
 uniform sampler2D sand_colors;
 
 // Bloom effect parameters
-uniform int bloom_size = 5;
+uniform int bloom_size = 3;
 uniform float bloom_separation = 3.0;
 uniform float bloom_threshold = 0.4;
 uniform float bloom_amount = 1.0;
