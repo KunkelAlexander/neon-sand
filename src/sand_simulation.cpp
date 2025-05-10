@@ -61,23 +61,59 @@ void SandSimulation::_ready() {
     simulation_width = 0;
 }
 
-void SandSimulation::resize_simulation(int width, int height) {
-    simulation_width  = width;
-    simulation_height = height;
+void SandSimulation::resize_simulation(int new_width, int new_height) {
+    // Store old dimensions
+    int old_width = simulation_width;
+    int old_height = simulation_height;
 
-    // ----- chunk geometry -----
-    chunks_x = (width + CHUNK_SIZE - 1) / CHUNK_SIZE;
-    chunks_y = (height + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    // Only save sand if we had a previous simulation
+    bool has_previous_data = (old_width > 0 && old_height > 0);
+
+    // Create a temporary copy of the current grid if needed
+    PackedByteArray old_grid;
+    if (has_previous_data) {
+        old_grid = sand_grids[active_grid].duplicate();
+    }
+
+    // Update dimensions
+    simulation_width = new_width;
+    simulation_height = new_height;
+
+    // Recalculate chunk geometry
+    chunks_x = (new_width + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    chunks_y = (new_height + CHUNK_SIZE - 1) / CHUNK_SIZE;
 
     // Initialize sand grids
     for (int i = 0; i < 2; i++) {
-        sand_grids[i].resize(width * height);
+        sand_grids[i].resize(new_width * new_height);
         sand_grids[i].fill(SAND_EMPTY);
+
         is_chunk_active[i].resize(chunks_x * chunks_y);
-        is_chunk_active[i].fill(0);
+        is_chunk_active[i].fill(1);
     }
 
-    x_permutation.resize(CHUNK_SIZE);
+    // Make sure our permutation array is big enough
+    x_permutation.resize(MAX(CHUNK_SIZE, x_permutation.size()));
+
+    // Restore previous sand data where it fits
+    if (has_previous_data) {
+        int copy_width = MIN(old_width, new_width);
+        int copy_height = MIN(old_height, new_height);
+
+        for (int y = 0; y < copy_height; y++) {
+            for (int x = 0; x < copy_width; x++) {
+                int old_pos = y * old_width + x;
+                int new_pos = y * new_width + x;
+
+                uint8_t sand_type = old_grid[old_pos];
+                sand_grids[active_grid].set(new_pos, sand_type);
+            }
+        }
+    }
+
+    // Clear the inactive grid
+    int inactive_grid = 1 - active_grid;
+    sand_grids[inactive_grid] = sand_grids[active_grid].duplicate();
 }
 
 void SandSimulation::_process(double delta) {
