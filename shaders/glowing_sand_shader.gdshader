@@ -37,13 +37,8 @@ void fragment() {
             // Calculate brightness value
             float value = max(sampleColor.r, max(sampleColor.g, sampleColor.b));
 
-            // Apply threshold
-            if (value < bloom_threshold) {
-                sampleColor = vec4(0.0);
-            }
-
             // Add to the result
-            bloomResult += sampleColor;
+            bloomResult += value * sampleColor;
             count += 1.0;
         }
     }
@@ -52,8 +47,5 @@ void fragment() {
     bloomResult /= count;
 
     // Mix the original color with the bloom effect if it is not transparent
-	if (0.0 < color.a)
-    	COLOR = color + mix(vec4(0.0), bloomResult, bloom_amount);
-	else
-    	COLOR = mix(vec4(0.0), bloomResult, bloom_amount);
+	COLOR = color + mix(vec4(0.0), bloomResult, bloom_amount);
 }

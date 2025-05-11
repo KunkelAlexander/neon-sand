@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1746899862|1406066497';
+const CACHE_VERSION = '1746951640|5471805067';
 /** @type {string} */
 const CACHE_PREFIX = 'Neon Sand-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
