@@ -61,3 +61,5 @@ The simulation uses several performance optimization techniques, such as:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This project makes use of the Dynalight font (https://fontlibrary.org/en/font/dynalight) released under the [SIL Open Font License](https://openfontlicense.org/open-font-license-official-text/).

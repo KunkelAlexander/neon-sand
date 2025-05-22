@@ -13,7 +13,7 @@ config_version=5
 config/name="Neon Sand"
 run/main_scene="res://scenes/cursor.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-boot_splash/image="uid://7ypr2ck0coxt"
+boot_splash/image="uid://dg1xu8e7urc62"
 config/icon="uid://dg1xu8e7urc62"
 
 [autoload]
@@ -24,6 +24,7 @@ Global="*res://scripts/global.gd"
 
 window/size/viewport_width=1600
 window/size/viewport_height=800
+window/size/mode=3
 window/handheld/orientation=6
 
 [editor]

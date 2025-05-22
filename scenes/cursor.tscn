@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://c8maycj72kdl7"]
+[gd_scene load_steps=10 format=3 uid="uid://c8maycj72kdl7"]
 
 [ext_resource type="Script" uid="uid://6obvkl6ec58y" path="res://scripts/cursor.gd" id="1_10kv6"]
 [ext_resource type="Script" uid="uid://dcnbemj7ja4xt" path="res://scripts/gpu_renderer.gd" id="3_vh1vf"]
 [ext_resource type="FontFile" uid="uid://ee7xbhgb8w64" path="res://assets/fonts/PressStart2P.ttf" id="4_iparr"]
+[ext_resource type="FontFile" uid="uid://c1wyktohhfdy7" path="res://assets/fonts/Dynalight-Regular.otf" id="4_xjntw"]
 [ext_resource type="Script" uid="uid://dhrqxaqkhky4t" path="res://scripts/show_fps.gd" id="5_dmrtd"]
 [ext_resource type="Script" uid="uid://bwdcjlu408pty" path="res://scripts/title.gd" id="5_pey64"]
 
@@ -90,8 +91,8 @@ offset_bottom = 184.0
 grow_horizontal = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
-theme_override_fonts/font = ExtResource("4_iparr")
-theme_override_font_sizes/font_size = 72
+theme_override_fonts/font = ExtResource("4_xjntw")
+theme_override_font_sizes/font_size = 128
 text = "Neon Sand"
 horizontal_alignment = 1
 vertical_alignment = 2
