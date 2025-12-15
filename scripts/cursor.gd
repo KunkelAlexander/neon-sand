@@ -1,8 +1,8 @@
 extends Node2D
 
-@onready var sand_sim = $"../SandSimulation"  # Reference the sand simulation node
-@onready var ui_root = $"../CanvasLayer/UI"
-@onready var base_resolution = Vector2(800, 600)  # Your designed reference size
+@onready var sand_sim = $"../SandSimulation"
+@onready var ui_root = $"../UI/HUD"
+@onready var base_resolution = Vector2(800, 600)
 
 var sand_type = 0
 var time_passed := 0.0
@@ -31,15 +31,15 @@ func _ready():
 			
 func _on_viewport_resized():
 	var new_size = get_viewport().size
-	var scale = min(new_size.x / base_resolution.x, new_size.y / base_resolution.y)
-	ui_root.scale = Vector2(scale, scale)
+	var new_scale = min(new_size.x / base_resolution.x, new_size.y / base_resolution.y)
+	ui_root.scale = Vector2(new_scale, new_scale)
 
 
 func _process(delta):
 	time_passed += delta
 
 	# Smooth cycle from 0 to 254 over 10 seconds (adjust speed as needed)
-	sand_type = int(time_passed * 10) % 252 + 2
+	sand_type = int(time_passed * 30) % 252 + 2
 
 	# Update cursor position
 	position = get_global_mouse_position()

@@ -38,18 +38,19 @@ Refer to the official guide for exporting to web platforms:
 
 ## Key Classes and Scripts
 
-- **SandSimulation (C++)**: Contains the core logic for the sand simulation, including methods for spawning sand, updating the grid, and managing sand types.
-- **cursor.gd**: Controls the user input for interacting with the simulation, including adjusting the cursor size and placing sand particles.
-- **cpu_renderer.gd**: Handles rendering the simulation using the CPU.
-- **gpu_renderer.gd**: Handles rendering the simulation using the GPU (optional, for optimization).
+- *SandSimulation*: **C++ script**: Contains the core logic for the sand simulation, including methods for spawning sand, updating the grid, and managing sand types.
+	- Handles the simulation logic.
+	- Stores a 2D grid of sand IDs (0…255) in a low-resolution array.
+	- Grid size (derived from screen size / Global.SIM_SCALE) is updated from the Godot code via the grid_updated signal.
+- *Input:* **cursor.gd**: Controls the user input for interacting with the simulation, including adjusting the cursor size and placing sand particles.
+- *SandRenderer*: 
+	- Handles the visual representation of the simulation.
+	- Converts the low-res simulation array into a texture (type_texture).
+	- Uses a shader to convert sand IDs into colors via a palette texture (sand_colors).
+	- Scales the low-res texture to fit the screen using a TextureRect
+
 - **show_fps.gd**: Displays the FPS in the corner of the screen.
 - **title.gd**: Displays the title screen with a fadeout animation.
-
-## Performance Optimization
-
-The simulation uses several performance optimization techniques, such as:
-- **Grid-based simulation**: Divides the simulation into a 2D grid to efficiently manage sand movement and placement.
-- **Active cell tracking**: Only updates cells that are actively interacting with other cells, reducing unnecessary calculations.
 
 ## Controls
 

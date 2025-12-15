@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c8maycj72kdl7"]
+[gd_scene load_steps=12 format=3 uid="uid://c8maycj72kdl7"]
 
 [ext_resource type="Script" uid="uid://6obvkl6ec58y" path="res://scripts/cursor.gd" id="1_10kv6"]
 [ext_resource type="Script" uid="uid://dcnbemj7ja4xt" path="res://scripts/gpu_renderer.gd" id="3_vh1vf"]
@@ -6,6 +6,8 @@
 [ext_resource type="FontFile" uid="uid://c1wyktohhfdy7" path="res://assets/fonts/Dynalight-Regular.otf" id="4_xjntw"]
 [ext_resource type="Script" uid="uid://dhrqxaqkhky4t" path="res://scripts/show_fps.gd" id="5_dmrtd"]
 [ext_resource type="Script" uid="uid://bwdcjlu408pty" path="res://scripts/title.gd" id="5_pey64"]
+[ext_resource type="Script" uid="uid://dnpysyemx1mon" path="res://scenes/sub_viewport_container.gd" id="6_snjn8"]
+[ext_resource type="Script" uid="uid://bwseav0scxc1x" path="res://scenes/bloom_quad.gd" id="7_xl2q8"]
 
 [sub_resource type="Animation" id="Animation_pey64"]
 length = 0.001
@@ -52,15 +54,16 @@ script = ExtResource("1_10kv6")
 
 [node name="SandSimulation" type="SandSimulation" parent="."]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="."]
 layer = -1
 follow_viewport_enabled = true
 
-[node name="UI" type="Control" parent="CanvasLayer"]
+[node name="HUD" type="Control" parent="UI"]
 layout_mode = 3
 anchors_preset = 0
+metadata/_edit_use_anchors_ = true
 
-[node name="FPS" type="Label" parent="CanvasLayer/UI"]
+[node name="FPS" type="Label" parent="UI/HUD"]
 visible = false
 layout_mode = 0
 offset_left = 32.0
@@ -75,18 +78,22 @@ text = "FPS: "
 vertical_alignment = 1
 script = ExtResource("5_dmrtd")
 
-[node name="Background" type="ColorRect" parent="CanvasLayer"]
+[node name="Background" type="ColorRect" parent="UI/HUD"]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.281187, 0.281187, 0.281187, 1)
+metadata/_edit_use_anchors_ = true
 
-[node name="Title" type="Label" parent="CanvasLayer"]
+[node name="Title" type="Label" parent="UI/HUD"]
 z_index = 1
+layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
+offset_right = 443.0
 offset_bottom = 184.0
 grow_horizontal = 2
 size_flags_horizontal = 3
@@ -97,12 +104,38 @@ text = "Neon Sand"
 horizontal_alignment = 1
 vertical_alignment = 2
 script = ExtResource("5_pey64")
+metadata/_edit_use_anchors_ = true
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="CanvasLayer/Title"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="UI/HUD/Title"]
 libraries = {
 &"": SubResource("AnimationLibrary_xjntw")
 }
 
-[node name="SandRenderer" type="Node2D" parent="."]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+stretch = true
+script = ExtResource("6_snjn8")
+metadata/_edit_use_anchors_ = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(2, 2)
+render_target_update_mode = 4
+
+[node name="SandRenderer" type="Node2D" parent="SubViewportContainer/SubViewport"]
 z_index = 4
 script = ExtResource("3_vh1vf")
+
+[node name="BloomQuad" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+expand_mode = 2
+script = ExtResource("7_xl2q8")
