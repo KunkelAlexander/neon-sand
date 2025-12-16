@@ -19,8 +19,7 @@ func _ready():
 	
 	shader_material.shader = shader
 	
-	await get_tree().process_frame
-	var screen_size = get_viewport().size
+	var screen_size = get_tree().get_root().size
 	
 	print("Reading screen size: ", screen_size)
 	width  = int(screen_size.x / Global.SIM_SCALE)
@@ -54,17 +53,17 @@ func _ready():
 
 	# Connect to simulation for updates
 	simulation.grid_updated.connect(_on_grid_updated)
-	
-	_resize_simulation()
 	# Connect viewport resize event
-	get_viewport().size_changed.connect(_resize_simulation)
+	_resize_simulation()
+	get_tree().get_root().size_changed.connect(_resize_simulation)
+	
 
 
 func _resize_simulation():
-	var screen_size = get_viewport().size
-	width  = int(screen_size.x / Global.SIM_SCALE)
+	var screen_size = get_tree().get_root().size
+	width = int(screen_size.x / Global.SIM_SCALE)
 	height = int(screen_size.y / Global.SIM_SCALE)
-	
+	print("Changed size to ", screen_size)
 
 	# Create low-res R8 image
 	type_image = Image.create(width, height, false, Image.FORMAT_R8)

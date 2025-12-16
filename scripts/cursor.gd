@@ -54,7 +54,7 @@ func _process(delta):
 		sand_sim.spawn_sand(position/Global.SIM_SCALE, brush_size, Global.SAND_EMPTY)
 	elif Input.is_action_pressed("left_click"):
 		sand_sim.spawn_sand(position/Global.SIM_SCALE, brush_size, sand_type)
-		
+
 
 	if Input.is_action_pressed("key_exit"):
 		get_tree().quit()
@@ -84,10 +84,10 @@ func handle_touch(event: InputEventScreenTouch):
 
 		last_tap_time = now
 		last_tap_pos = event.position
-		
+
 		# Store the touch position when pressed
 		touch_positions[event.index] = event.position
-		
+
 		# If we have exactly 2 touches after adding this touch, capture initial distance
 		if touch_positions.size() == 2:
 			var positions = touch_positions.values()
@@ -99,22 +99,22 @@ func handle_touch(event: InputEventScreenTouch):
 		if touch_positions.size() == 2:
 			var positions = touch_positions.values()
 			var current_distance = positions[0].distance_to(positions[1])
-			
+
 			# Calculate pinch scale and adjust brush size
 			if last_touch_distance > 0:
 				var distance_delta = current_distance - last_touch_distance
-			
+
 				var size_change = distance_delta * pinch_sensitivity
 				adjust_brush_size(size_change)
-		
+
 		# Remove the touch position when released
 		touch_positions.erase(event.index)
-		
+
 		# Reset last distance if we don't have 2 touches anymore
 		if touch_positions.size() != 2:
 			last_touch_distance = 0.0
-			
-			
+
+
 		# Stop double-tap action on release
 		double_tap_active = false
 func _draw():
