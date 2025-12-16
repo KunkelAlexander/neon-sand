@@ -31,14 +31,13 @@ var last_gesture_scale := 1.0
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)  # Hide default cursor
-
-	var viewport = get_viewport()
-	viewport.connect("size_changed", Callable(self, "_on_viewport_resized"))
-	_on_viewport_resized()  # Trigger once initially
-
+	# Set scale of ui_root
+	_on_viewport_resized()
+	# Register handler for automatic resizing
+	get_tree().get_root().size_changed.connect(_on_viewport_resized)
 			
 func _on_viewport_resized():
-	var new_size = get_viewport().size
+	var new_size = get_tree().get_root().size
 	var new_scale = min(new_size.x / base_resolution.x, new_size.y / base_resolution.y)
 	ui_root.scale = Vector2(new_scale, new_scale)
 
