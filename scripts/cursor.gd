@@ -46,8 +46,8 @@ func _on_viewport_resized():
 func _process(delta):
 	time_passed += delta
 
-	# Smooth cycle from 0 to 254 over 10 seconds (adjust speed as needed)
-	sand_type = int(time_passed * 30) % 252 + 2
+	# Smooth cycle from 0 to 254 (adjust speed as needed)
+	sand_type = int(time_passed * 10) % 252 + 2
 
 	# Update cursor position
 	position = get_global_mouse_position()

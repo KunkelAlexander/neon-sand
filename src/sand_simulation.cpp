@@ -44,8 +44,20 @@ int SandSimulation::chunk_index_from_pos(int pos) const {
 }
 
 void SandSimulation::add_to_chunk(int grid, int pos) {
-    const int ci = chunk_index_from_pos(pos);
-    is_chunk_active[grid][ci] |= true;
+    const int x  = pos % simulation_width;
+    const int y  = pos / simulation_width;
+    const int cx = x / CHUNK_SIZE;
+    const int cy = y / CHUNK_SIZE;
+
+    for (int dy = -1; dy <= 1; ++dy) {
+        for (int dx = -1; dx <= 1; ++dx) {
+            const int ncx = cx + dx;
+            const int ncy = cy + dy;
+            if (ncx < 0 || ncy < 0 || ncx >= chunks_x || ncy >= chunks_y) continue;
+            const int nci = ncy * chunks_x + ncx;
+            is_chunk_active[grid].set(nci, 1);
+        }
+    }
 }
 
 
@@ -93,6 +105,9 @@ void SandSimulation::resize_simulation(int new_width, int new_height) {
     }
 
 
+    // Update chunks in different x-permutations to avoid directional bias
+    // The result still looks a bit odd at times, but I am generally happy with the feel of the simulation
+    // Performance is good with this solution
     for (int k = 0; k < N_PERMUTATIONS; ++k) {
         for (int l = 0; l < 2; ++l) {
 
@@ -174,7 +189,7 @@ void SandSimulation::update_sand() {
     chunk_new.fill(0);
 
 
-    /* ----  2) iterate chunks bottom‑up ---- */
+    // Iterate chunks bottom‑up
     for (int cy = chunks_y - 1; cy >= 0; --cy) {
         int y0 = cy * CHUNK_SIZE;
         int y1 = MIN(y0 + CHUNK_SIZE, height) - 1;
@@ -187,54 +202,61 @@ void SandSimulation::update_sand() {
             const int rob = ro + width;
             const int roa = ro - width;
 
+            // Randomise x-update order to counter directional bias
+            bool flip = (UtilityFunctions::randi() & 1);          // per-row, or per-frame
+            int cx_start = flip ? (chunks_x - 1) : 0;
+            int cx_end   = flip ? -1 : chunks_x;                  // stop when cx == cx_end
+            int cx_step  = flip ? -1 : 1;
 
-            for (int cx = 0; cx < chunks_x; ++cx) {
+            for (int cx = cx_start; cx != cx_end; cx += cx_step) {
                 const int chunk_id = cy * chunks_x + cx;
-                if (chunk_old[chunk_id] == 0) continue;   // skip empty
+                if (chunk_old[chunk_id] == 0) continue;
 
                 int x0 = cx * CHUNK_SIZE;
                 int x1 = MIN(x0 + CHUNK_SIZE, width);
 
-                const int chunk_width = x1 - x0;
+                const int chunk_width       = x1 - x0;
                 const int chunk_width_index = (chunk_width == CHUNK_SIZE) ? 0 : 1;
-                int k = UtilityFunctions::randi() % (N_PERMUTATIONS);
+
+                int k = UtilityFunctions::randi() % N_PERMUTATIONS;
+
                 for (int i = 0; i < chunk_width; ++i) {
-                    const int x = x0 + chunk_size_permutations[chunk_width_index][k][i];
+                    const int x   = x0 + chunk_size_permutations[chunk_width_index][k][i];
                     const int pos = ro + x;
                     const uint8_t t = grid_old[pos];
                     if (t == SAND_EMPTY) continue;
 
-                    // check possible sand movement
                     int dest = pos;
                     const int below = rob + x;
-                    if (grid_old[below] == SAND_EMPTY) {
+
+                    if (grid_new[below] == SAND_EMPTY) {
                         dest = below;
                     } else {
                         bool left_empty  = (x > 0)         && (grid_new[rob + x - 1] == SAND_EMPTY);
                         bool right_empty = (x < width - 1) && (grid_new[rob + x + 1] == SAND_EMPTY);
+
                         if (left_empty && right_empty)
                             dest = (UtilityFunctions::randi() & 1) ? (rob + x - 1) : (rob + x + 1);
                         else if (left_empty)
                             dest = rob + x - 1;
                         else if (right_empty)
                             dest = rob + x + 1;
-                        else
-                            dest = pos;
                     }
 
-                    if (pos != dest) {
-                        // sand moves
+                    if (pos != dest && grid_new[dest] == SAND_EMPTY) {
                         grid_new.set(pos, SAND_EMPTY);
                         grid_new.set(dest, t);
+
                         const int above = roa + x;
-                        if (above >= 0)    add_to_chunk     (1 - active_grid, above);
-                        if (x > 0)         add_to_chunk     (1 - active_grid, x + ro - 1);
-                        if (x < width - 1) add_to_chunk     (1 - active_grid, x + ro + 1);
-                        add_to_chunk     (1 - active_grid, pos);
-                        add_to_chunk     (1 - active_grid, dest);
+                        if (above >= 0)    add_to_chunk(1 - active_grid, above);
+                        if (x > 0)         add_to_chunk(1 - active_grid, x + ro - 1);
+                        if (x < width - 1) add_to_chunk(1 - active_grid, x + ro + 1);
+                        add_to_chunk(1 - active_grid, pos);
+                        add_to_chunk(1 - active_grid, dest);
                     }
                 }
             }
+
         }
     }
 
@@ -273,7 +295,11 @@ void SandSimulation::spawn_sand(const Vector2& coords, int radius, int sand_type
             // Use UtilityFunctions instead of Math for random
             if (UtilityFunctions::randf() < spawn_probability) {
                 int pos = new_x + new_y * width;
-                if (sand_grids[active_grid][pos] == SAND_EMPTY || sand_type == SAND_EMPTY) {
+
+                // Check both active and non-active grid for empty particles to avoid overwriting falling particles
+                int g0 = sand_grids[0][pos];
+                int g1 = sand_grids[1][pos];
+                if (g0 == SAND_EMPTY && g1 == SAND_EMPTY || sand_type == SAND_EMPTY) {
                     Array pos_type;
                     pos_type.push_back(pos);
                     pos_type.push_back(sand_type);

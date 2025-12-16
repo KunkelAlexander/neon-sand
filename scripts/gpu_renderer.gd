@@ -80,126 +80,115 @@ func _resize_simulation():
 	# Resize simulation grid
 	var simulation = get_tree().current_scene.get_node("SandSimulation")
 	simulation.resize_simulation(width, height)
-
 func create_color_palette_texture():
-	var palette_size = 255
-	var base_colors := []
-	var num_base = 9
-	
+	var palette_size := 256
+
+	const COLORMAPS := {
+		# --- Perceptual / scientific ---
+		"viridis": [
+			Color8(68, 1, 84),
+			Color8(59, 82, 139),
+			Color8(33, 145, 140),
+			Color8(94, 201, 97),
+			Color8(253, 231, 37),
+		],
+		"plasma": [
+			Color8(13, 8, 135),
+			Color8(84, 3, 160),
+			Color8(139, 10, 165),
+			Color8(191, 53, 131),
+			Color8(249, 140, 10),
+			Color8(252, 253, 191),
+		],
+		"inferno": [
+			Color8(0, 0, 4),
+			Color8(31, 12, 72),
+			Color8(85, 15, 109),
+			Color8(136, 34, 106),
+			Color8(186, 54, 85),
+			Color8(227, 89, 51),
+			Color8(249, 140, 10),
+			Color8(252, 255, 164),
+		],
+		"magma": [
+			Color8(0, 0, 4),
+			Color8(28, 16, 68),
+			Color8(79, 18, 123),
+			Color8(129, 37, 129),
+			Color8(181, 54, 122),
+			Color8(229, 80, 100),
+			Color8(251, 135, 97),
+			Color8(252, 253, 191),
+		],
+		"cividis": [
+			Color8(0, 32, 76),
+			Color8(0, 64, 128),
+			Color8(64, 96, 128),
+			Color8(128, 128, 128),
+			Color8(192, 160, 96),
+			Color8(255, 224, 128),
+		],
+
+		# --- Game / thermal / material ---
+		"hot": [
+			Color8(10, 0, 0),
+			Color8(120, 0, 0),
+			Color8(255, 80, 0),
+			Color8(255, 200, 0),
+			Color8(255, 255, 255),
+		],
+		"afmhot": [
+			Color8(0, 0, 0),
+			Color8(120, 0, 0),
+			Color8(255, 60, 0),
+			Color8(255, 200, 0),
+			Color8(255, 255, 255),
+		],
+		"copper": [
+			Color8(0, 0, 0),
+			Color8(60, 30, 10),
+			Color8(120, 70, 30),
+			Color8(180, 120, 60),
+			Color8(255, 200, 140),
+		],
+		"coolwarm": [
+			Color8(59, 76, 192),
+			Color8(120, 160, 220),
+			Color8(220, 220, 220),
+			Color8(240, 140, 120),
+			Color8(180, 4, 38),
+		],
+		"berlin": [
+			Color8(10, 10, 20),
+			Color8(40, 60, 90),
+			Color8(80, 120, 140),
+			Color8(150, 170, 150),
+			Color8(230, 220, 200),
+		]
+	}
+
 	randomize()
-	var themes = ["random"]
-	var theme = themes.pick_random()
+	var map_name: String = COLORMAPS.keys().pick_random() as String
+	var anchors: Array = COLORMAPS[map_name]
+	var num_anchors := anchors.size()
 
-	match theme:
-		"sunset":
-			base_colors = [
-				Color.from_hsv(0.02, 0.8, 0.9),  # Warm orange
-				Color.from_hsv(0.05, 0.9, 0.9),
-				Color.from_hsv(0.08, 0.7, 0.95),
-				Color.from_hsv(0.12, 0.5, 1.0),
-				Color.from_hsv(0.65, 0.7, 0.9),
-				Color.from_hsv(0.7, 0.8, 0.8),
-				Color.from_hsv(0.75, 0.9, 0.6),
-				Color.from_hsv(0.8, 1.0, 0.5),
-				Color.from_hsv(0.02, 0.8, 0.9),  # Warm orange
-			]
-		"forest":
-			base_colors = [
-				Color.from_hsv(0.3, 0.8, 0.6),
-				Color.from_hsv(0.33, 0.9, 0.4),
-				Color.from_hsv(0.35, 0.7, 0.7),
-				Color.from_hsv(0.1, 0.6, 0.5),
-				Color.from_hsv(0.12, 0.5, 0.8),
-				Color.from_hsv(0.58, 0.7, 0.7),
-				Color.from_hsv(0.6, 0.6, 0.5),
-				Color.from_hsv(0.15, 0.4, 0.3),
-				Color.from_hsv(0.3, 0.8, 0.6),
-			]
-		"ocean":
-			base_colors = [
-				Color.from_hsv(0.5, 0.7, 0.9),
-				Color.from_hsv(0.55, 0.8, 0.8),
-				Color.from_hsv(0.6, 0.9, 0.7),
-				Color.from_hsv(0.63, 1.0, 0.5),
-				Color.from_hsv(0.58, 0.6, 0.8),
-				Color.from_hsv(0.52, 0.7, 0.7),
-				Color.from_hsv(0.6, 0.4, 0.9),
-				Color.from_hsv(0.5, 0.8, 0.6),
-				Color.from_hsv(0.5, 0.7, 0.9)
-			]
-		"night":
-			base_colors = [
-				Color.from_hsv(0.67, 0.9, 0.3),  # Deep blue
-				Color.from_hsv(0.72, 0.8, 0.2),
-				Color.from_hsv(0.75, 0.7, 0.4),
-				Color.from_hsv(0.8, 0.6, 0.15),
-				Color.from_hsv(0.85, 0.5, 0.1),
-				Color.from_hsv(0.9, 0.3, 0.5),   # Purple
-				Color.from_hsv(0.1, 0.9, 0.9),   # Stars (yellow)
-				Color.from_hsv(0.65, 0.2, 0.8),  # Light blue
-				Color.from_hsv(0.67, 0.9, 0.3)   # Deep blue (closing loop)
-			]
-		"desert":
-			base_colors = [
-				Color.from_hsv(0.08, 0.7, 0.8),  # Sandy orange
-				Color.from_hsv(0.1, 0.8, 0.7),
-				Color.from_hsv(0.05, 0.6, 0.9),
-				Color.from_hsv(0.07, 0.5, 0.5),
-				Color.from_hsv(0.09, 0.4, 0.4),
-				Color.from_hsv(0.11, 0.3, 0.95), # Light tan
-				Color.from_hsv(0.02, 0.8, 0.6),  # Terracotta
-				Color.from_hsv(0.58, 0.7, 0.8),  # Sky blue
-				Color.from_hsv(0.08, 0.7, 0.8)   # Sandy orange (closing loop)
-			]
-		"space":
-			base_colors = [
-				Color.from_hsv(0.7, 0.9, 0.1),   # Deep space blue
-				Color.from_hsv(0.75, 0.8, 0.15),
-				Color.from_hsv(0.8, 0.7, 0.2),   # Purple space
-				Color.from_hsv(0.05, 0.9, 0.9),  # Star yellow
-				Color.from_hsv(0.3, 0.8, 0.7),   # Nebula green
-				Color.from_hsv(0.95, 0.7, 0.6),  # Nebula pink
-				Color.from_hsv(0.6, 0.9, 0.3),   # Cosmic blue
-				Color.from_hsv(0.15, 0.9, 0.9),  # Cosmic orange
-				Color.from_hsv(0.7, 0.9, 0.1)    # Deep space blue (closing loop)
-			]
-		"random":
-			# Create a completely random color palette
-			base_colors = []
-			var first_color = Color.from_hsv(randf(), randf_range(0.5, 1.0), randf_range(0.5, 1.0))
-			base_colors.append(first_color)
-			
-			# Generate 7 more random colors
-			for i in range(7):
-				base_colors.append(Color.from_hsv(randf(), randf_range(0.5, 1.0), randf_range(0.5, 1.0)))
-			
-			# Close the loop with the first color
-			base_colors.append(first_color)
-		
-	# Apply slight random variations to colors
-	for i in range(num_base):
-		var color = base_colors[i]
-		var hue_shift = randf_range(-0.02, 0.02)
-		var sat_shift = randf_range(-0.1, 0.1)
-		var val_shift = randf_range(-0.1, 0.1)
-		var h = clamp(color.h + hue_shift, 0.0, 1.0)
-		var s = clamp(color.s + sat_shift, 0.0, 1.0)
-		var v = clamp(color.v + val_shift, 0.0, 1.0)
-		base_colors[i] = Color.from_hsv(h, s, v)
+	var palette_image := Image.create(palette_size, 1, false, Image.FORMAT_RGBA8)
 
-	var palette_image = Image.create(palette_size, 1, false, Image.FORMAT_RGBA8)
-	for i in range(palette_size):
-		var t = float(i) / (palette_size - 1) * (num_base - 1)
-		var index = int(t)
-		var frac = t - index
+	# Index 0: transparent black (empty cell / air)
+	palette_image.set_pixel(0, 0, Color(0, 0, 0, 0))
 
-		var c1 = base_colors[index]
-		var c2 = base_colors[min(index + 1, num_base - 1)]
+	for i in range(1, palette_size):
+		var t := float(i) / float(palette_size - 1)
+		var scaled := t * (num_anchors - 1)
+		var index := int(scaled)
+		var frac := scaled - index
 
-		var interpolated = c1.lerp(c2, frac)
-		palette_image.set_pixel(i, 0, interpolated)
-	# Bloom will mix with this
-	palette_image.set_pixel(0, 0, Color(0,0,0,0))
+		var c1: Color = anchors[index]
+		var c2: Color = anchors[min(index + 1, num_anchors - 1)]
+
+		var color := c1.lerp(c2, frac)
+		palette_image.set_pixel(i, 0, color)
+
 	color_palette_texture = ImageTexture.create_from_image(palette_image)
 
 func create_shiny_palette_texture():
