@@ -38,12 +38,15 @@ Refer to the official guide for exporting to web platforms:
 
 ## Key Classes and Scripts
 
-- *SandSimulation*: **C++ script**: Contains the core logic for the sand simulation, including methods for spawning sand, updating the grid, and managing sand types.
-	- Handles the simulation logic.
+- *SandSimulation*:
+	- **C++ script**
+	- Contains the core logic for the sand simulation, including methods for spawning sand, updating the grid, and managing sand types.
 	- Stores a 2D grid of sand IDs (0…255) in a low-resolution array.
 	- Grid size (derived from screen size / Global.SIM_SCALE) is updated from the Godot code via the grid_updated signal.
-- *Input:* **cursor.gd**: Controls the user input for interacting with the simulation, including adjusting the cursor size and placing sand particles.
-- *SandRenderer*: 
+- *Input:*
+	- **cursor.gd**
+	- Controls the user input for interacting with the simulation, including adjusting the cursor size and placing sand particles.
+- *SandRenderer*:
 	- Handles the visual representation of the simulation.
 	- Converts the low-res simulation array into a texture (type_texture).
 	- Uses a shader to convert sand IDs into colors via a palette texture (sand_colors).
@@ -54,9 +57,9 @@ Refer to the official guide for exporting to web platforms:
 
 ## Controls
 
-- **Left Mouse Button**: Spawn sand at the cursor position with a dynamic sand type (color changes over time).
-- **Right Mouse Button**: Remove sand from the simulation at the cursor position.
-- **Mouse Wheel**: Adjust the cursor size for sand placement.
+- **Left mouse button**: Spawn sand at the cursor position with a dynamic sand type (color changes over time).
+- **Right mouse button or double-tap**: Remove sand from the simulation at the cursor position.
+- **Mouse wheel or pinch gesture**: Adjust the cursor size for sand placement.
 - **Escape Key**: Quit the simulation.
 
 ## License

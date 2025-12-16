@@ -49,9 +49,17 @@ void SandSimulation::add_to_chunk(int grid, int pos) {
     const int cx = x / CHUNK_SIZE;
     const int cy = y / CHUNK_SIZE;
 
-    const int nci = cy * chunks_x + cx;
-    is_chunk_active[grid].set(nci, 1);
+    for (int dy = -1; dy <= 1; ++dy) {
+        for (int dx = -1; dx <= 1; ++dx) {
+            const int ncx = cx + dx;
+            const int ncy = cy + dy;
+            if (ncx < 0 || ncy < 0 || ncx >= chunks_x || ncy >= chunks_y) continue;
+            const int nci = ncy * chunks_x + ncx;
+            is_chunk_active[grid].set(nci, 1);
+        }
+    }
 }
+
 
 
 void SandSimulation::remove_from_chunk(int grid, int pos) {

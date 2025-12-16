@@ -14,14 +14,14 @@ var last_touch_distance := 0.0
 
 # Track touch points for pinch-to-zoom
 var touch_positions = {}
-var min_brush_size = 5.0
+var min_brush_size = 1.0
 var max_brush_size = 50.0
 var pinch_sensitivity = 0.5  # Adjust this to control sensitivity
 
 # Double-tap detection
 var last_tap_time := 0.0
 var last_tap_pos := Vector2.ZERO
-var double_tap_max_time := 0.3      # seconds
+var double_tap_max_time := 1.0      # seconds
 var double_tap_max_distance := 30.0 # pixels
 
 var double_tap_active := false
@@ -53,22 +53,19 @@ func _process(delta):
 
 	# Adjust cursor size with mouse wheel
 	if Input.is_action_just_pressed("scroll_up"):
-		brush_size = min(brush_size + 2, 50)
+		brush_size = min(brush_size + 2, max_brush_size)
 		queue_redraw()
 	elif Input.is_action_just_pressed("scroll_down"):
-		brush_size = max(brush_size - 2, 5)
+		brush_size = max(brush_size - 2, min_brush_size)
 		queue_redraw()
 
 	# Create sand particles when left mouse button is pressed
-	if Input.is_action_pressed("left_click"):
-		sand_sim.spawn_sand(position/Global.SIM_SCALE, brush_size, sand_type)
 
-	if Input.is_action_pressed("right_click"):
+	if Input.is_action_pressed("right_click") or double_tap_active:
 		sand_sim.spawn_sand(position/Global.SIM_SCALE, brush_size, Global.SAND_EMPTY)
+	elif Input.is_action_pressed("left_click"):
+		sand_sim.spawn_sand(position/Global.SIM_SCALE, brush_size, sand_type)
 		
-	# Touch "right click" via double tap
-	if double_tap_active:
-		sand_sim.spawn_sand(position/Global.SIM_SCALE, brush_size, Global.SAND_EMPTY)
 
 	if Input.is_action_pressed("key_exit"):
 		get_tree().quit()
