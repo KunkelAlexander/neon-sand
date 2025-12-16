@@ -30,7 +30,7 @@ private:
     int active_grid = 0;
 
     // Number of chunks in X/Y and the per–chunk activity counters
-    static const uint32_t CHUNK_SIZE = 32;          // 32 also works – just change here
+    static const uint32_t CHUNK_SIZE = 8;          // 32 also works – just change here
     static const uint32_t N_PERMUTATIONS = 10;
     uint32_t chunks_x;
     uint32_t chunks_y;
