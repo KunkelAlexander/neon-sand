@@ -55,6 +55,7 @@ func _ready():
 	# Connect to simulation for updates
 	simulation.grid_updated.connect(_on_grid_updated)
 	
+	_resize_simulation()
 	# Connect viewport resize event
 	get_viewport().size_changed.connect(_resize_simulation)
 
