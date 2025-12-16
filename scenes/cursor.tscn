@@ -69,6 +69,7 @@ grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="FPS" type="Label" parent="UI/HUD"]
+visible = false
 layout_mode = 0
 offset_right = 155.0
 offset_bottom = 31.0
@@ -92,10 +93,12 @@ color = Color(0.281187, 0.281187, 0.281187, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Title" type="Label" parent="UI/HUD"]
+visible = false
 z_index = 1
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
+offset_right = 443.0
 offset_bottom = 184.0
 grow_horizontal = 2
 size_flags_horizontal = 3
