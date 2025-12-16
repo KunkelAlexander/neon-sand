@@ -118,6 +118,11 @@ libraries = {
 }
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 stretch = true
 script = ExtResource("6_snjn8")
 metadata/_edit_use_anchors_ = true
@@ -144,5 +149,4 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-expand_mode = 2
 script = ExtResource("7_xl2q8")

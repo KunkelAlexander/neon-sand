@@ -6,8 +6,8 @@ var type_texture = ImageTexture.new()
 var color_palette_texture = ImageTexture.new()
 var texture_rect: TextureRect
 var type_image: Image
-var width: int
-var height: int 
+var simu_width: int
+var simu_height: int 
 
 
 func _ready():
@@ -19,67 +19,54 @@ func _ready():
 	
 	shader_material.shader = shader
 	
-	var screen_size = get_tree().get_root().size
 	
-	print("Reading screen size: ", screen_size)
-	width  = int(screen_size.x / Global.SIM_SCALE)
-	height = int(screen_size.y / Global.SIM_SCALE)
+	# Set up the TextureRect
+	texture_rect              = TextureRect.new()
+	texture_rect.expand       = true
+	texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	texture_rect.material     = shader_material
+	texture_rect.z_index      = 0  # Any value higher than other siblings
+	add_child(texture_rect)
 	
-	# Recreate image and texture and rebind it
-	type_image   = Image.create(width, height, false, Image.FORMAT_R8)
-	type_texture = ImageTexture.create_from_image(type_image)
-	shader_material.set_shader_parameter("sand_texture", type_texture)
-	shader_material.set_shader_parameter("simulation_resolution", Vector2(width, height))
+	_resize_simulation()
 	
 	# Create color palette texture
 	create_color_palette_texture()
 	shader_material.set_shader_parameter("sand_colors", color_palette_texture)
 	
 	
-	# Set up the TextureRect
-	texture_rect = TextureRect.new()
-	texture_rect.expand = true
-	texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	texture_rect.texture = type_texture
-	texture_rect.material = shader_material
-	texture_rect.z_index = 0  # Any value higher than other siblings
-	texture_rect.size = screen_size
-	add_child(texture_rect)
-	
-	
-	# Notify the simulation of its size
-	var simulation = get_tree().current_scene.get_node("SandSimulation")
-	simulation.resize_simulation(width, height)
-
 	# Connect to simulation for updates
+	var simulation = get_tree().current_scene.get_node("SandSimulation")
 	simulation.grid_updated.connect(_on_grid_updated)
+	
 	# Connect viewport resize event
-	_resize_simulation()
 	get_tree().get_root().size_changed.connect(_resize_simulation)
 	
 
 
 func _resize_simulation():
 	var screen_size = get_tree().get_root().size
-	width = int(screen_size.x / Global.SIM_SCALE)
-	height = int(screen_size.y / Global.SIM_SCALE)
-	print("Changed size to ", screen_size)
+	print("Sand renderer updated with screen size ", screen_size)
+	simu_width  = int(screen_size.x / Global.SIM_SCALE)
+	simu_height = int(screen_size.y / Global.SIM_SCALE)
+	print("Sand renderer updated with simu size ", simu_width, "x", simu_height)
 
 	# Create low-res R8 image
-	type_image = Image.create(width, height, false, Image.FORMAT_R8)
+	type_image = Image.create(simu_width, simu_height, false, Image.FORMAT_R8)
 
 	# Create texture with nearest-neighbor filtering
 	type_texture = ImageTexture.create_from_image(type_image)	
 	shader_material.set_shader_parameter("sand_texture", type_texture)
-	shader_material.set_shader_parameter("simulation_resolution", Vector2(width, height))
+	shader_material.set_shader_parameter("simulation_resolution", Vector2(simu_width, simu_height))
 
 	# Update TextureRect
 	texture_rect.texture = type_texture
 	texture_rect.size    = screen_size
 
 	# Resize simulation grid
+	print("Simulation resized to ", simu_width, "x", simu_height)
 	var simulation = get_tree().current_scene.get_node("SandSimulation")
-	simulation.resize_simulation(width, height)
+	simulation.resize_simulation(simu_width, simu_height)
 	
 func create_color_palette_texture():
 	var palette_size := 256
@@ -193,5 +180,5 @@ func create_color_palette_texture():
 	color_palette_texture = ImageTexture.create_from_image(palette_image)
 
 func _on_grid_updated(grid):
-	type_image.set_data(width, height, false, Image.FORMAT_R8, grid)
+	type_image.set_data(simu_width, simu_height, false, Image.FORMAT_R8, grid)
 	type_texture.update(type_image)

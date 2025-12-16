@@ -7,3 +7,4 @@ func _ready():
 
 func _resize():
 	size = get_tree().get_root().size
+	print("Subviewport container resized to get_tree().get_root().size = ", size)
