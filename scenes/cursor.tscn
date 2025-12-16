@@ -55,21 +55,23 @@ script = ExtResource("1_10kv6")
 [node name="SandSimulation" type="SandSimulation" parent="."]
 
 [node name="UI" type="CanvasLayer" parent="."]
-layer = -1
-follow_viewport_enabled = true
+layer = 0
 
 [node name="HUD" type="Control" parent="UI"]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -800.0
+offset_bottom = -600.0
+grow_horizontal = 2
+grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="FPS" type="Label" parent="UI/HUD"]
-visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 24.0
-offset_right = 229.0
-offset_bottom = 96.0
+offset_right = 155.0
+offset_bottom = 31.0
 size_flags_horizontal = 3
 size_flags_vertical = 8
 theme_override_fonts/font = ExtResource("4_iparr")
@@ -79,6 +81,7 @@ vertical_alignment = 1
 script = ExtResource("5_dmrtd")
 
 [node name="Background" type="ColorRect" parent="UI/HUD"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -93,7 +96,6 @@ z_index = 1
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_right = 443.0
 offset_bottom = 184.0
 grow_horizontal = 2
 size_flags_horizontal = 3
@@ -104,7 +106,6 @@ text = "Neon Sand"
 horizontal_alignment = 1
 vertical_alignment = 2
 script = ExtResource("5_pey64")
-metadata/_edit_use_anchors_ = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="UI/HUD/Title"]
 libraries = {
@@ -126,6 +127,7 @@ z_index = 4
 script = ExtResource("3_vh1vf")
 
 [node name="BloomQuad" type="TextureRect" parent="."]
+z_index = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
