@@ -1,8 +1,6 @@
 extends Node2D
 
 @onready var sand_sim = $"../SandSimulation"
-@onready var ui_root = $"../UI/HUD"
-@onready var base_resolution = Vector2(800, 600)
 
 var sand_type = 0
 var time_passed := 0.0
@@ -31,16 +29,6 @@ var last_gesture_scale := 1.0
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)  # Hide default cursor
-	# Set scale of ui_root
-	_on_viewport_resized()
-	# Register handler for automatic resizing
-	get_tree().get_root().size_changed.connect(_on_viewport_resized)
-			
-func _on_viewport_resized():
-	var new_size = get_tree().get_root().size
-	var new_scale = min(new_size.x / base_resolution.x, new_size.y / base_resolution.y)
-	ui_root.scale = Vector2(new_scale, new_scale)
-
 
 func _process(delta):
 	time_passed += delta
@@ -49,6 +37,7 @@ func _process(delta):
 	sand_type = int(time_passed * 10) % 252 + 2
 
 	# Update cursor position
+	# This is screen space, but the sand simulation wants world-space
 	position = get_global_mouse_position()
 
 	# Adjust cursor size with mouse wheel

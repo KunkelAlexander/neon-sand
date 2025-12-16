@@ -56,8 +56,10 @@ script = ExtResource("1_10kv6")
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 0
+visible = false
 
 [node name="HUD" type="Control" parent="UI"]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
