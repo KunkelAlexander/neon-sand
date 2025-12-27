@@ -59,6 +59,7 @@ script = ExtResource("1_10kv6")
 layer = 0
 
 [node name="HUD" type="Control" parent="UI"]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -82,17 +83,6 @@ theme_override_font_sizes/font_size = 31
 text = "FPS: "
 vertical_alignment = 1
 script = ExtResource("5_dmrtd")
-
-[node name="Background" type="ColorRect" parent="UI/HUD"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.281187, 0.281187, 0.281187, 1)
-metadata/_edit_use_anchors_ = true
 
 [node name="Title" type="Label" parent="UI/HUD"]
 z_index = 1
