@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://c8maycj72kdl7"]
+[gd_scene load_steps=14 format=3 uid="uid://c8maycj72kdl7"]
 
 [ext_resource type="Script" uid="uid://6obvkl6ec58y" path="res://scripts/cursor.gd" id="1_10kv6"]
 [ext_resource type="Script" uid="uid://65pgya52l4mq" path="res://scenes/hud.gd" id="2_snjn8"]
@@ -47,6 +47,8 @@ _data = {
 &"fade_out": SubResource("Animation_n5qf0")
 }
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lk1ck"]
+
 [node name="Node2D" type="Node2D"]
 
 [node name="Input" type="Node2D" parent="."]
@@ -59,7 +61,6 @@ script = ExtResource("1_10kv6")
 layer = 0
 
 [node name="HUD" type="Control" parent="UI"]
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -68,6 +69,7 @@ offset_right = -800.0
 offset_bottom = -600.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("2_snjn8")
 metadata/_edit_use_anchors_ = true
 
@@ -105,12 +107,44 @@ libraries = {
 &"": SubResource("AnimationLibrary_xjntw")
 }
 
+[node name="PaletteControls" type="VBoxContainer" parent="UI/HUD"]
+layout_mode = 1
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 168.0
+offset_bottom = 68.0
+mouse_filter = 2
+
+[node name="PaletteButton" type="Button" parent="UI/HUD/PaletteControls"]
+z_index = -1
+custom_minimum_size = Vector2(144, 44)
+layout_mode = 2
+focus_mode = 0
+text = "Cycle palette"
+
+[node name="PalettePreview" type="TextureRect" parent="UI/HUD/PaletteControls/PaletteButton"]
+material = SubResource("ShaderMaterial_lk1ck")
+custom_minimum_size = Vector2(144, 44)
+layout_mode = 1
+offset_left = 6.0
+offset_right = 150.0
+offset_bottom = 44.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ShaderButton" type="Button" parent="UI/HUD/PaletteControls"]
+custom_minimum_size = Vector2(133, 44)
+layout_mode = 2
+text = "Pick shader"
+
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 stretch = true
 script = ExtResource("6_snjn8")
 metadata/_edit_use_anchors_ = true
@@ -137,4 +171,8 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 2
 script = ExtResource("7_xl2q8")
+
+[connection signal="pressed" from="UI/HUD/PaletteControls/PaletteButton" to="SubViewportContainer/SubViewport/SandRenderer" method="_on_palette_button_pressed"]
+[connection signal="pressed" from="UI/HUD/PaletteControls/ShaderButton" to="BloomQuad" method="_on_shader_button_pressed"]

@@ -27,6 +27,7 @@ private:
     // The grid stores an integer per pixel (0 = empty, otherwise the sand type)
     PackedByteArray sand_grids[2];
 
+
     int active_grid = 0;
 
     // Number of chunks in X/Y and the per–chunk activity counters

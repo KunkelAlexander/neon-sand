@@ -47,7 +47,8 @@ func _process(delta):
 	elif Input.is_action_just_pressed("scroll_down"):
 		brush_size = max(brush_size - 2, min_brush_size)
 		queue_redraw()
-
+		
+		
 	# Create sand particles when left mouse button is pressed
 
 	if Input.is_action_pressed("right_click") or double_tap_active:
