@@ -87,6 +87,7 @@ vertical_alignment = 1
 script = ExtResource("5_dmrtd")
 
 [node name="Title" type="Label" parent="UI/HUD"]
+visible = false
 z_index = 1
 layout_mode = 1
 anchors_preset = 10
@@ -158,7 +159,7 @@ render_target_update_mode = 4
 z_index = 4
 script = ExtResource("3_vh1vf")
 
-[node name="BloomQuad" type="TextureRect" parent="."]
+[node name="Shader" type="TextureRect" parent="."]
 z_index = 2
 anchors_preset = 15
 anchor_right = 1.0
@@ -175,4 +176,4 @@ mouse_filter = 2
 script = ExtResource("7_xl2q8")
 
 [connection signal="pressed" from="UI/HUD/PaletteControls/PaletteButton" to="SubViewportContainer/SubViewport/SandRenderer" method="_on_palette_button_pressed"]
-[connection signal="pressed" from="UI/HUD/PaletteControls/ShaderButton" to="BloomQuad" method="_on_shader_button_pressed"]
+[connection signal="pressed" from="UI/HUD/PaletteControls/ShaderButton" to="Shader" method="_on_shader_button_pressed"]

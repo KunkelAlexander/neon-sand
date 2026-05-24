@@ -13,6 +13,16 @@
 
 using namespace godot;
 
+
+uint32_t rng_state = 0x12345678u;
+
+inline uint32_t fast_rand() {
+    rng_state ^= rng_state << 13;
+    rng_state ^= rng_state >> 17;
+    rng_state ^= rng_state << 5;
+    return rng_state;
+}
+
 SandSimulation::SandSimulation() {
 }
 
@@ -137,7 +147,7 @@ void SandSimulation::resize_simulation(int new_width, int new_height) {
 
             // shuffle the permutation array
             for (int i = chunk_size - 1; i > 0; --i) {
-                int j = UtilityFunctions::randi() % (i + 1);
+                int j = fast_rand() % (i + 1);
                 int temp = chunk_size_permutations[l][k][i];
                 chunk_size_permutations[l][k].set(i, chunk_size_permutations[l][k][j]);
                 chunk_size_permutations[l][k].set(j, temp);
@@ -181,16 +191,13 @@ void SandSimulation::update_sand() {
 
 
     // Add any new sand pixels to the active grid
-    for (int i = 0; i < active_pixels.size(); i++) {
-        const Array pos_type = active_pixels[i];
-        const int pos        = pos_type[0];
-        const int sand_type  = pos_type[1];
-        sand_grids[active_grid].set(pos, sand_type);
+    for (const PendingPixel &p : active_pixels) {
+        sand_grids[active_grid].set(p.pos, p.type);
         // increase number of active cells in chunk pos
-        if (sand_type == SAND_EMPTY) {
-            wake_deleted_area(active_grid, pos);
+        if (p.type == SAND_EMPTY) {
+            wake_deleted_area(active_grid, p.pos);
         } else {
-            wake_spawn_area(active_grid, pos);
+            wake_spawn_area(active_grid, p.pos);
         }
     }
     active_pixels.clear();
@@ -199,7 +206,7 @@ void SandSimulation::update_sand() {
     // Instead of using active cells, we'll process the entire grid
     PackedByteArray& grid_old  = sand_grids[    active_grid];
     PackedByteArray& grid_new  = sand_grids[1 - active_grid];
-    grid_new = grid_old.duplicate();
+    grid_new = grid_old;
 
 
     PackedByteArray& chunk_old  = is_chunk_active[    active_grid];
@@ -221,7 +228,7 @@ void SandSimulation::update_sand() {
             const int roa = ro - width;
 
             // Randomise x-update order to counter directional bias
-            bool flip = (UtilityFunctions::randi() & 1);          // per-row, or per-frame
+            bool flip = (fast_rand() & 1);          // per-row, or per-frame
             int cx_start = flip ? (chunks_x - 1) : 0;
             int cx_end   = flip ? -1 : chunks_x;                  // stop when cx == cx_end
             int cx_step  = flip ? -1 : 1;
@@ -236,7 +243,7 @@ void SandSimulation::update_sand() {
                 const int chunk_width       = x1 - x0;
                 const int chunk_width_index = (chunk_width == CHUNK_SIZE) ? 0 : 1;
 
-                int k = UtilityFunctions::randi() % N_PERMUTATIONS;
+                int k = fast_rand() % N_PERMUTATIONS;
 
                 for (int i = 0; i < chunk_width; ++i) {
                     const int x   = x0 + chunk_size_permutations[chunk_width_index][k][i];
@@ -254,7 +261,7 @@ void SandSimulation::update_sand() {
                         bool right_empty = (x < width - 1) && (grid_new[rob + x + 1] == SAND_EMPTY);
 
                         if (left_empty && right_empty)
-                            dest = (UtilityFunctions::randi() & 1) ? (rob + x - 1) : (rob + x + 1);
+                            dest = (fast_rand() & 1) ? (rob + x - 1) : (rob + x + 1);
                         else if (left_empty)
                             dest = rob + x - 1;
                         else if (right_empty)
@@ -283,7 +290,7 @@ void SandSimulation::update_sand() {
 
 }
 
-void SandSimulation::spawn_sand(const Vector2& coords, int radius, int sand_type) {
+void SandSimulation::spawn_sand(const Vector2& coords, int radius, int sand_type, float density) {
 
     int grid_x = coords.x;
     int grid_y = coords.y;
@@ -306,12 +313,8 @@ void SandSimulation::spawn_sand(const Vector2& coords, int radius, int sand_type
                 continue;
             }
 
-            // Introduce randomness for a more natural look
-            float distance_factor = 1.0f - static_cast<float>(distance_sq) / static_cast<float>(radius * radius);
-            float spawn_probability = 0.2f + 0.05f * distance_factor;
-
             // Use UtilityFunctions instead of Math for random
-            if (UtilityFunctions::randf() < spawn_probability) {
+            if (UtilityFunctions::randf() < density) {
                 int pos = new_x + new_y * width;
 
                 // Check both active and non-active grid for empty particles to avoid overwriting falling particles
@@ -322,13 +325,13 @@ void SandSimulation::spawn_sand(const Vector2& coords, int radius, int sand_type
                     Array pos_type;
                     pos_type.push_back(pos);
                     pos_type.push_back(sand_type);
-                    active_pixels.push_back(pos_type);
+                    active_pixels.push_back({pos, static_cast<uint8_t>(sand_type)});
                 // Delete sand
                 } else if (sand_type == SAND_EMPTY) {
                     Array pos_type;
                     pos_type.push_back(pos);
                     pos_type.push_back(sand_type);
-                    active_pixels.push_back(pos_type);
+                    active_pixels.push_back({pos, static_cast<uint8_t>(sand_type)});
                 }
             }
         }

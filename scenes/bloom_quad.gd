@@ -3,15 +3,14 @@ extends TextureRect
 @onready var vp := $"../SubViewportContainer/SubViewport"
 
 var shaders := [
+	preload("res://shaders/tv_bloom.gdshader"),
 	preload("res://shaders/bloom.gdshader"),
-	preload("res://shaders/prismatic_bloom.gdshader"),
 	preload("res://shaders/passthrough.gdshader"),
 	preload("res://shaders/mirror.gdshader"),
 	preload("res://shaders/pixelation.gdshader"),
 	preload("res://shaders/aberration.gdshader"),
 	preload("res://shaders/desert.gdshader"),
 	preload("res://shaders/kaleidoscope.gdshader"),
-	preload("res://shaders/retro.gdshader"),
 ]
 
 var shader_index := 0

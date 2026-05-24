@@ -10,7 +10,7 @@ var simu_width: int
 var simu_height: int 
 var palette_names: Array[String] = []
 var current_palette_index := 0
-var current_palette_name := "viridis"
+var current_palette_name := "magma"
 
 @onready var palette_button: Button = get_tree().current_scene.get_node("UI/HUD/PaletteControls/PaletteButton")
 @onready var palette_preview: TextureRect = get_tree().current_scene.get_node("UI/HUD/PaletteControls/PaletteButton/PalettePreview")
@@ -18,85 +18,85 @@ var current_palette_name := "viridis"
 const COLORMAPS := {
 	# --- Perceptual / scientific ---
 	"viridis": [
-		Color8(68, 1, 84),
-		Color8(59, 82, 139),
-		Color8(33, 145, 140),
-		Color8(94, 201, 97),
 		Color8(253, 231, 37),
+		Color8(94, 201, 97),
+		Color8(33, 145, 140),
+		Color8(59, 82, 139),
+		Color8(68, 1, 84),
 	],
 	"plasma": [
-		Color8(13, 8, 135),
-		Color8(84, 3, 160),
-		Color8(139, 10, 165),
-		Color8(191, 53, 131),
-		Color8(249, 140, 10),
 		Color8(252, 253, 191),
+		Color8(249, 140, 10),
+		Color8(191, 53, 131),
+		Color8(139, 10, 165),
+		Color8(84, 3, 160),
+		Color8(13, 8, 135),
 	],
 	"inferno": [
-		Color8(0, 0, 4),
-		Color8(31, 12, 72),
-		Color8(85, 15, 109),
-		Color8(136, 34, 106),
-		Color8(186, 54, 85),
-		Color8(227, 89, 51),
-		Color8(249, 140, 10),
 		Color8(252, 255, 164),
+		Color8(249, 140, 10),
+		Color8(227, 89, 51),
+		Color8(186, 54, 85),
+		Color8(136, 34, 106),
+		Color8(85, 15, 109),
+		Color8(31, 12, 72),
+		Color8(0, 0, 4),
 	],
 	"magma": [
-		Color8(0, 0, 4),
-		Color8(28, 16, 68),
-		Color8(79, 18, 123),
-		Color8(129, 37, 129),
-		Color8(181, 54, 122),
-		Color8(229, 80, 100),
-		Color8(251, 135, 97),
 		Color8(252, 253, 191),
+		Color8(251, 135, 97),
+		Color8(229, 80, 100),
+		Color8(181, 54, 122),
+		Color8(129, 37, 129),
+		Color8(79, 18, 123),
+		Color8(28, 16, 68),
+		Color8(0, 0, 4),
 	],
 	"cividis": [
-		Color8(0, 32, 76),
-		Color8(0, 64, 128),
-		Color8(64, 96, 128),
-		Color8(128, 128, 128),
-		Color8(192, 160, 96),
 		Color8(255, 224, 128),
+		Color8(192, 160, 96),
+		Color8(128, 128, 128),
+		Color8(64, 96, 128),
+		Color8(0, 64, 128),
+		Color8(0, 32, 76),
 	],
 
 	# --- Game / thermal / material ---
 	"hot": [
-		Color8(10, 0, 0),
-		Color8(120, 0, 0),
-		Color8(255, 80, 0),
-		Color8(255, 200, 0),
 		Color8(255, 255, 255),
+		Color8(255, 200, 0),
+		Color8(255, 80, 0),
+		Color8(120, 0, 0),
+		Color8(10, 0, 0),
 	],
 	"afmhot": [
-		Color8(0, 0, 0),
-		Color8(120, 0, 0),
-		Color8(255, 60, 0),
-		Color8(255, 200, 0),
 		Color8(255, 255, 255),
+		Color8(255, 200, 0),
+		Color8(255, 60, 0),
+		Color8(120, 0, 0),
+		Color8(0, 0, 0),
 	],
 	"copper": [
-		Color8(0, 0, 0),
-		Color8(60, 30, 10),
-		Color8(120, 70, 30),
-		Color8(180, 120, 60),
 		Color8(255, 200, 140),
+		Color8(180, 120, 60),
+		Color8(120, 70, 30),
+		Color8(60, 30, 10),
+		Color8(0, 0, 0),
 	],
 	"coolwarm": [
-		Color8(59, 76, 192),
-		Color8(120, 160, 220),
-		Color8(220, 220, 220),
-		Color8(240, 140, 120),
 		Color8(180, 4, 38),
+		Color8(240, 140, 120),
+		Color8(220, 220, 220),
+		Color8(120, 160, 220),
+		Color8(59, 76, 192),
 	],
 	"berlin": [
-		Color8(10, 10, 20),
-		Color8(40, 60, 90),
-		Color8(80, 120, 140),
-		Color8(150, 170, 150),
 		Color8(230, 220, 200),
-	]
+		Color8(150, 170, 150),
+		Color8(80, 120, 140),
+		Color8(40, 60, 90),
+		Color8(10, 10, 20),
+	],
 }
 
 
@@ -164,8 +164,8 @@ func create_color_palette_texture(map_name: String):
 
 
 	if not COLORMAPS.has(map_name):
-		push_warning("Unknown palette '%s', falling back to viridis." % map_name)
-		map_name = "viridis"
+		push_warning("Unknown palette '%s', falling back to magma." % map_name)
+		map_name = "magma"
 	var anchors: Array = COLORMAPS[map_name]
 	var num_anchors := anchors.size()
 
@@ -249,7 +249,7 @@ func create_palette_preview_texture(map_name: String, width := 160, height := 40
 
 func sample_palette_color(map_name: String, t: float) -> Color:
 	if not COLORMAPS.has(map_name):
-		map_name = "viridis"
+		map_name = "magma"
 
 	var anchors: Array = COLORMAPS[map_name]
 	var num_anchors := anchors.size()

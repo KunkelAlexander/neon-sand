@@ -41,7 +41,12 @@ private:
 
 
     // List of indices (in the grid) that were added this frame
-    Array active_pixels;
+    struct PendingPixel {
+        int pos;
+        uint8_t type;
+    };
+
+    std::vector<PendingPixel> active_pixels;
 
     // Dictionary used as a set for cells that need to be updated.
     Dictionary active_cells;  // keys are cell indices; values are true
@@ -73,7 +78,7 @@ public:
     void debug_list_all_nodes();
 
     // Spawn sand into the simulation
-    void spawn_sand(const Vector2& coords, int radius, int sand_type);
+    void spawn_sand(const Vector2& coords, int radius, int sand_type, float density);
 
     // Resize simulation grid
     void resize_simulation(int width, int height);
