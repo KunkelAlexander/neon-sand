@@ -13,8 +13,8 @@ config_version=5
 config/name="Neon Sand"
 run/main_scene="res://scenes/cursor.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-boot_splash/image="uid://dg1xu8e7urc62"
-config/icon="uid://dg1xu8e7urc62"
+boot_splash/image="uid://drugci52y38l"
+config/icon="uid://donxu5tbqm6w1"
 
 [autoload]
 

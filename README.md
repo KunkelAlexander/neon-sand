@@ -1,6 +1,6 @@
 # Neon Sand Simulation
 
-Neon Sand is a falling sand simulation built with the Godot Engine. The sand logic is implemented using a C++ GDExtension to handle simulation updates and the interaction of different sand types. The simulation can be run in the Godot editor or exported for the web.
+Neon Sand is a falling sand simulation built with the Godot Engine. The sand logic is implemented using a C++ GDExtension to handle simulation updates and the interaction of different sand types. The simulation can be run in the Godot editor or exported for the web. [Play it here.](https://kunkelalexander.github.io/neon-sand/)
 
 ![gameplay](assets/ingame.gif)
 
