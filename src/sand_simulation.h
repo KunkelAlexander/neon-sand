@@ -50,8 +50,8 @@ private:
     int get_height() const;
     int chunk_index_from_pos(int pos) const;
 
-    void add_to_chunk(int grid, int pos);
-    void remove_from_chunk(int grid, int pos);
+    void wake_spawn_area(int grid, int pos);
+    void wake_deleted_area(int grid, int pos);
 
 protected:
     static void _bind_methods();

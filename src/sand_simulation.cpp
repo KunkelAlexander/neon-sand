@@ -43,7 +43,8 @@ int SandSimulation::chunk_index_from_pos(int pos) const {
     return (y / CHUNK_SIZE) * chunks_x + (x / CHUNK_SIZE);
 }
 
-void SandSimulation::add_to_chunk(int grid, int pos) {
+// Add 3x3 region around added pixel to dirty chunks
+void SandSimulation::wake_spawn_area(int grid, int pos) {
     const int x  = pos % simulation_width;
     const int y  = pos / simulation_width;
     const int cx = x / CHUNK_SIZE;
@@ -60,12 +61,24 @@ void SandSimulation::add_to_chunk(int grid, int pos) {
     }
 }
 
+// Wake wide column above deleted sand
+void SandSimulation::wake_deleted_area(int grid, int pos) {
+    const int wake_chunks_x = 4;
+    const int x = pos % simulation_width;
+    const int y = pos / simulation_width;
 
+    const int cx = x / CHUNK_SIZE;
+    const int cy = y / CHUNK_SIZE;
 
-void SandSimulation::remove_from_chunk(int grid, int pos) {
-    const int ci = chunk_index_from_pos(pos);
+    for (int wake_cy = cy; wake_cy >= 0; --wake_cy) {
+        for (int dcx = -wake_chunks_x; dcx <= wake_chunks_x; ++dcx) {
+            const int wake_cx = cx + dcx;
+            if (wake_cx < 0 || wake_cx >= chunks_x) continue;
+
+            is_chunk_active[grid].set(wake_cy * chunks_x + wake_cx, 1);
+        }
+    }
 }
-
 
 
 void SandSimulation::_ready() {
@@ -174,7 +187,11 @@ void SandSimulation::update_sand() {
         const int sand_type  = pos_type[1];
         sand_grids[active_grid].set(pos, sand_type);
         // increase number of active cells in chunk pos
-        add_to_chunk(active_grid, pos);
+        if (sand_type == SAND_EMPTY) {
+            wake_deleted_area(active_grid, pos);
+        } else {
+            wake_spawn_area(active_grid, pos);
+        }
     }
     active_pixels.clear();
 
@@ -249,11 +266,11 @@ void SandSimulation::update_sand() {
                         grid_new.set(dest, t);
 
                         const int above = roa + x;
-                        if (above >= 0)    add_to_chunk(1 - active_grid, above);
-                        if (x > 0)         add_to_chunk(1 - active_grid, x + ro - 1);
-                        if (x < width - 1) add_to_chunk(1 - active_grid, x + ro + 1);
-                        add_to_chunk(1 - active_grid, pos);
-                        add_to_chunk(1 - active_grid, dest);
+                        if (above >= 0)    wake_spawn_area(1 - active_grid, above);
+                        if (x > 0)         wake_spawn_area(1 - active_grid, x + ro - 1);
+                        if (x < width - 1) wake_spawn_area(1 - active_grid, x + ro + 1);
+                        wake_spawn_area(1 - active_grid, pos);
+                        wake_spawn_area(1 - active_grid, dest);
                     }
                 }
             }
@@ -300,7 +317,14 @@ void SandSimulation::spawn_sand(const Vector2& coords, int radius, int sand_type
                 // Check both active and non-active grid for empty particles to avoid overwriting falling particles
                 int g0 = sand_grids[0][pos];
                 int g1 = sand_grids[1][pos];
-                if (g0 == SAND_EMPTY && g1 == SAND_EMPTY || sand_type == SAND_EMPTY) {
+                // Add sand
+                if (g0 == SAND_EMPTY && g1 == SAND_EMPTY) {
+                    Array pos_type;
+                    pos_type.push_back(pos);
+                    pos_type.push_back(sand_type);
+                    active_pixels.push_back(pos_type);
+                // Delete sand
+                } else if (sand_type == SAND_EMPTY) {
                     Array pos_type;
                     pos_type.push_back(pos);
                     pos_type.push_back(sand_type);
