@@ -1,51 +1,13 @@
-[gd_scene load_steps=14 format=3 uid="uid://c8maycj72kdl7"]
+[gd_scene load_steps=10 format=3 uid="uid://c8maycj72kdl7"]
 
 [ext_resource type="Script" uid="uid://6obvkl6ec58y" path="res://scripts/cursor.gd" id="1_10kv6"]
+[ext_resource type="Script" uid="uid://dlvr1a7dd8kq6" path="res://scenes/ui.gd" id="2_km28a"]
 [ext_resource type="Script" uid="uid://65pgya52l4mq" path="res://scenes/hud.gd" id="2_snjn8"]
 [ext_resource type="Script" uid="uid://dcnbemj7ja4xt" path="res://scripts/gpu_renderer.gd" id="3_vh1vf"]
 [ext_resource type="FontFile" uid="uid://ee7xbhgb8w64" path="res://assets/fonts/PressStart2P.ttf" id="4_iparr"]
-[ext_resource type="FontFile" uid="uid://c1wyktohhfdy7" path="res://assets/fonts/Dynalight-Regular.otf" id="4_xjntw"]
 [ext_resource type="Script" uid="uid://dhrqxaqkhky4t" path="res://scripts/show_fps.gd" id="5_dmrtd"]
-[ext_resource type="Script" uid="uid://bwdcjlu408pty" path="res://scripts/title.gd" id="5_pey64"]
 [ext_resource type="Script" uid="uid://dnpysyemx1mon" path="res://scenes/sub_viewport_container.gd" id="6_snjn8"]
 [ext_resource type="Script" uid="uid://bwseav0scxc1x" path="res://scenes/bloom_quad.gd" id="7_xl2q8"]
-
-[sub_resource type="Animation" id="Animation_pey64"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Color(1, 1, 1, 1)]
-}
-
-[sub_resource type="Animation" id="Animation_n5qf0"]
-resource_name = "fade_out"
-length = 5.0
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 4.96667),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_xjntw"]
-_data = {
-&"RESET": SubResource("Animation_pey64"),
-&"fade_out": SubResource("Animation_n5qf0")
-}
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_lk1ck"]
 
@@ -59,6 +21,7 @@ script = ExtResource("1_10kv6")
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 0
+script = ExtResource("2_km28a")
 
 [node name="HUD" type="Control" parent="UI"]
 layout_mode = 3
@@ -74,7 +37,6 @@ script = ExtResource("2_snjn8")
 metadata/_edit_use_anchors_ = true
 
 [node name="FPS" type="Label" parent="UI/HUD"]
-visible = false
 layout_mode = 0
 offset_right = 155.0
 offset_bottom = 31.0
@@ -85,28 +47,6 @@ theme_override_font_sizes/font_size = 31
 text = "FPS: "
 vertical_alignment = 1
 script = ExtResource("5_dmrtd")
-
-[node name="Title" type="Label" parent="UI/HUD"]
-visible = false
-z_index = 1
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 157.0
-grow_horizontal = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-theme_override_fonts/font = ExtResource("4_xjntw")
-theme_override_font_sizes/font_size = 128
-text = "Neon Sand"
-horizontal_alignment = 1
-vertical_alignment = 2
-script = ExtResource("5_pey64")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="UI/HUD/Title"]
-libraries = {
-&"": SubResource("AnimationLibrary_xjntw")
-}
 
 [node name="PaletteControls" type="VBoxContainer" parent="UI/HUD"]
 layout_mode = 1

@@ -134,21 +134,32 @@ func _ready():
 	get_tree().get_root().size_changed.connect(_resize_simulation)
 	
 
+func _get_area_bucket(screen_size: Vector2i) -> float:
+	var area_scale := float(screen_size.x * screen_size.y) / float(800 * 600)
 
+	return 4.0 if area_scale >= 16.0 else \
+		3.0 if area_scale >= 9.0 else \
+		2.0 if area_scale >= 4.0 else \
+		1.5 if area_scale >= 2.25 else \
+		1.0
+		
+func _resize_ui() -> void:
+	var screen_size := get_tree().root.size
+	var bucket := _get_area_bucket(screen_size)
+
+	Global.UI_SCALE = bucket
+
+	var size = Vector2(48, 48) * Global.UI_SCALE
+	$UI/HUD/PaletteControls/PaletteButton.custom_minimum_size = size
+	$UI/HUD/PaletteControls/ShaderButton.custom_minimum_size = size
+	
 func _resize_simulation():
 	var screen_size = get_tree().get_root().size
 	
-	var shortest_side = min(screen_size.x, screen_size.y)
+	
+	var bucket := _get_area_bucket(screen_size)
 
-	if shortest_side >= 2160:
-		Global.SIM_SCALE = 24   # 4K-ish
-	elif shortest_side >= 1440:
-		Global.SIM_SCALE = 16   # 1440p-ish
-	elif shortest_side >= 720:
-		Global.SIM_SCALE = 8    # 720p-ish
-	else:
-		Global.SIM_SCALE = 4    # 800x600-ish or smaller
-
+	Global.SIM_SCALE = int(4 * bucket)
 
 	print("SIM_SCALE is now ", Global.SIM_SCALE)
 
