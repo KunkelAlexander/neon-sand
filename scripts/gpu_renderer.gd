@@ -138,12 +138,17 @@ func _ready():
 func _resize_simulation():
 	var screen_size = get_tree().get_root().size
 	
-	if screen_size.x >= 3000:
-		Global.SIM_SCALE = 8
-	elif screen_size.x >= 1800:
-		Global.SIM_SCALE = 6
+	var shortest_side = min(screen_size.x, screen_size.y)
+
+	if shortest_side >= 2160:
+		Global.SIM_SCALE = 24   # 4K-ish
+	elif shortest_side >= 1440:
+		Global.SIM_SCALE = 16   # 1440p-ish
+	elif shortest_side >= 720:
+		Global.SIM_SCALE = 8    # 720p-ish
 	else:
-		Global.SIM_SCALE = 4
+		Global.SIM_SCALE = 4    # 800x600-ish or smaller
+
 
 	print("SIM_SCALE is now ", Global.SIM_SCALE)
 
