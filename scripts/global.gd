@@ -4,4 +4,4 @@ extends Node
 const SAND_EMPTY = 0
 
 
-const SIM_SCALE = 4
+var SIM_SCALE = 4

@@ -137,6 +137,16 @@ func _ready():
 
 func _resize_simulation():
 	var screen_size = get_tree().get_root().size
+	
+	if screen_size.x >= 3000:
+		Global.SIM_SCALE = 8
+	elif screen_size.x >= 1800:
+		Global.SIM_SCALE = 6
+	else:
+		Global.SIM_SCALE = 4
+
+	print("SIM_SCALE is now ", Global.SIM_SCALE)
+
 	print("Sand renderer updated with screen size ", screen_size)
 	simu_width  = int(screen_size.x / Global.SIM_SCALE)
 	simu_height = int(screen_size.y / Global.SIM_SCALE)

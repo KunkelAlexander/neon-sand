@@ -113,19 +113,19 @@ layout_mode = 1
 offset_left = 12.0
 offset_top = 12.0
 offset_right = 168.0
-offset_bottom = 68.0
+offset_bottom = 212.0
 mouse_filter = 2
 
 [node name="PaletteButton" type="Button" parent="UI/HUD/PaletteControls"]
 z_index = -1
-custom_minimum_size = Vector2(144, 44)
+custom_minimum_size = Vector2(144, 88)
 layout_mode = 2
 focus_mode = 0
 text = "Cycle palette"
 
 [node name="PalettePreview" type="TextureRect" parent="UI/HUD/PaletteControls/PaletteButton"]
 material = SubResource("ShaderMaterial_lk1ck")
-custom_minimum_size = Vector2(144, 44)
+custom_minimum_size = Vector2(144, 88)
 layout_mode = 1
 offset_left = 6.0
 offset_right = 150.0
@@ -135,9 +135,9 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="ShaderButton" type="Button" parent="UI/HUD/PaletteControls"]
-custom_minimum_size = Vector2(133, 44)
+custom_minimum_size = Vector2(133, 88)
 layout_mode = 2
-text = "Pick shader"
+text = "Cycle shader"
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15
